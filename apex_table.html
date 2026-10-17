@@ -29,8 +29,8 @@
 (function(){
  var rows=[],sortKey='netWorth',asc=false;
  var dash='-';
- function money(n){return n==null?dash:n>=1e6?'$'+(n/1e6).toFixed(1)+'M':'$'+(n/1e3).toFixed(1)+'k';}
- function km(n){return n==null?dash:n>=1000?(n/1e3).toFixed(1)+'k km':n+' km';}
+ function money(n){return n==null?dash:'$'+Math.round(n).toLocaleString('en-US');}
+ function km(n){return n==null?dash:Math.round(n).toLocaleString('en-US')+' km';}
  function flat(m){var j=m.job||{};return{
   name:m.name,level:m.level,netWorth:m.netWorth,distanceKm:m.distanceKm,
   jobKm:j.km==null?null:j.km,jobTime:j.time||null,jobFuel:j.fuelL==null?null:j.fuelL,
