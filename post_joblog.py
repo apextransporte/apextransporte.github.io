@@ -2,32 +2,36 @@ import os
 import requests
 
 API = "https://discord.com/api/v10"
+RED = 0xE10600
 
 
 def send_joblog(job):
     token = os.environ["DISCORD_BOT_TOKEN"]
     channel_id = os.environ["DISCORD_OUTPUT_CHANNEL_ID"]
 
-    lines = [
-        f"👤: {job['driver']}",
-        f"🏢: [{job['company']}]",
-        f"📅: {job['date']}",
-        "",
-        f"🛣️: {job['distance']} km",
-        f"⏱️: {job['time']}",
-        f"💶: {job['income']}",
-        f"🏆: {job['level']}",
-        f"DmgP: {job['dmg']}",
-        f"TmP: {job['tmp']}",
-    ]
-    if job.get("xp") is not None:
-        lines.append(f"XP: {job['xp']}")
-    lines += ["", "✅ Accepted"]
-
     embed = {
-        "description": "\n".join(lines),
-        "color": 0xE53935,
+        "title": f"🚛 {job['driver']}",
+        "description": f"Delivered a job for **{job['company']}**",
+        "color": RED,
+        "fields": [
+            {"name": "🛣️ Distance", "value": f"{job['distance']:,} km", "inline": True},
+            {"name": "⏱️ Time", "value": str(job["time"]), "inline": True},
+            {"name": "💶 Income", "value": f"€{job['income']:,}", "inline": True},
+            {"name": "🏆 Level", "value": str(job["level"]), "inline": True},
+            {"name": "💥 Damage", "value": f"-€{job['dmg']:,}", "inline": True},
+            {"name": "⌛ Time Penalty", "value": f"-€{job['tmp']:,}", "inline": True},
+        ],
+        "footer": {"text": f"Apex Transporte • {job['date']}"},
     }
+    if job.get("xp") is not None:
+        embed["fields"].insert(
+            4, {"name": "✨ XP", "value": f"{job['xp']:,}", "inline": True}
+        )
+    embed["fields"].append({"name": "Status", "value": "✅ Accepted", "inline": False})
+
+    logo = os.environ.get("LOGO_URL")
+    if logo:
+        embed["thumbnail"] = {"url": logo}
     if job.get("image_url"):
         embed["image"] = {"url": job["image_url"]}
 
@@ -39,20 +43,3 @@ def send_joblog(job):
     )
     response.raise_for_status()
     return response.json()["id"]
-
-
-if __name__ == "__main__":
-    example = {
-        "driver": "Apex | keem",
-        "company": "Apex",
-        "date": "October 12 13:56",
-        "distance": 182,
-        "time": "2h 14m",
-        "income": 3088,
-        "level": 381,
-        "dmg": 162,
-        "tmp": 0,
-        "xp": 1109599,
-        "image_url": "",
-    }
-    print(send_joblog(example))
