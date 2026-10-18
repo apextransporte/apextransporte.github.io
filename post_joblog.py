@@ -3,6 +3,7 @@ import requests
 
 API = "https://discord.com/api/v10"
 RED = 0xE10600
+DEFAULT_LOGO = "https://apextransporte.github.io/logo.png"
 
 
 def send_joblog(job):
@@ -13,6 +14,7 @@ def send_joblog(job):
         "title": f"🚛 {job['driver']}",
         "description": f"Delivered a job for **{job['company']}**",
         "color": RED,
+        "thumbnail": {"url": os.environ.get("LOGO_URL") or DEFAULT_LOGO},
         "fields": [
             {"name": "🛣️ Distance", "value": f"{job['distance']:,} km", "inline": True},
             {"name": "⏱️ Time", "value": str(job["time"]), "inline": True},
@@ -29,9 +31,6 @@ def send_joblog(job):
         )
     embed["fields"].append({"name": "Status", "value": "✅ Accepted", "inline": False})
 
-    logo = os.environ.get("LOGO_URL")
-    if logo:
-        embed["thumbnail"] = {"url": logo}
     if job.get("image_url"):
         embed["image"] = {"url": job["image_url"]}
 
