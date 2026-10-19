@@ -111,15 +111,6 @@
       "joined": "2026-04-27T17:37:55.326000+00:00"
     },
     {
-      "id": "1303722675830521991",
-      "name": "Apex | Dev Malvin",
-      "username": "mrxdking",
-      "global_name": "mrx",
-      "nick": "Apex | Dev Malvin",
-      "avatar": "https://cdn.discordapp.com/avatars/1303722675830521991/ca2698cdc62c87267b29577e4869faaa.png?size=128",
-      "joined": "2026-09-27T08:41:52.950000+00:00"
-    },
-    {
       "id": "1457003459382611989",
       "name": "Apex | Gamer-y2b",
       "username": "thegamery2b",
@@ -208,6 +199,15 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/1187411222153396347/f7f2e9361e8a54ce6e72580ac7b967af.png?size=128",
       "joined": "2026-01-04T17:21:43.197000+00:00"
+    },
+    {
+      "id": "1303722675830521991",
+      "name": "Apex | mrx",
+      "username": "mrxdking",
+      "global_name": "mrx",
+      "nick": "Apex | mrx",
+      "avatar": "https://cdn.discordapp.com/avatars/1303722675830521991/ca2698cdc62c87267b29577e4869faaa.png?size=128",
+      "joined": "2026-09-27T08:41:52.950000+00:00"
     },
     {
       "id": "1287902161396826125",
