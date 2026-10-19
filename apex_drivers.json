@@ -1,81 +1,81 @@
 {
-"sources": "net worth leaderboard (site), distance top 5 (22 Sep 2026), job log (site)",
-"members": [
-{
-"name": "Corprate keem",
-"netWorth": 6100000,
-"netWorthRank": 1,
-"distanceKm": 214700,
-"job": {
-"km": 163,
-"time": "2 h 12 m",
-"income": 4063,
-"levelFrom": 385,
-"levelTo": 386
-}
-},
-{
-"name": "Tiash",
-"netWorth": 1100000,
-"netWorthRank": 4,
-"distanceKm": null,
-"job": null
-},
-{
-"name": "Mezikis",
-"netWorth": 1000000,
-"netWorthRank": 5,
-"distanceKm": 49100,
-"job": {
-"km": 396,
-"time": "7 h 24 m",
-"fuelL": 233,
-"income": 7249,
-"levelFrom": 171,
-"levelTo": 172
-}
-},
-{
-"name": "Razael",
-"netWorth": 129500,
-"netWorthRank": 13,
-"distanceKm": null,
-"job": null
-},
-{
-"name": "AlmedinDriver",
-"netWorth": 59300,
-"netWorthRank": 19,
-"distanceKm": null,
-"job": null
-},
-{
-"name": "Shaggy",
-"netWorth": 8100,
-"netWorthRank": 37,
-"distanceKm": null,
-"job": null
-},
-{
-"name": "Yusuf",
-"netWorth": null,
-"netWorthRank": null,
-"distanceKm": null,
-"job": null
-},
-{
-"name": "mrx",
-"netWorth": null,
-"netWorthRank": null,
-"distanceKm": 23156,
-"job": {
-"km": 304,
-"time": "1 h 56 m",
-"fuelL": 109,
-"income": 5130,
-"levelFrom": 30,
-"levelTo": 30
-}
-}
-]
+  "sources": "net worth leaderboard (site), distance top 5 (22 Sep 2026), job log (site)",
+  "members": [
+    {
+      "name": "Corprate keem",
+      "netWorth": 6100000,
+      "netWorthRank": 1,
+      "distanceKm": 214700,
+      "job": {
+        "km": 163,
+        "time": "2 h 12 m",
+        "income": 4063,
+        "levelFrom": 385,
+        "levelTo": 386
+      }
+    },
+    {
+      "name": "Tiash",
+      "netWorth": 1100000,
+      "netWorthRank": 4,
+      "distanceKm": null,
+      "job": null
+    },
+    {
+      "name": "Mezikis",
+      "netWorth": 1000000,
+      "netWorthRank": 5,
+      "distanceKm": 49100,
+      "job": {
+        "km": 396,
+        "time": "7 h 24 m",
+        "fuelL": 233,
+        "income": 7249,
+        "levelFrom": 171,
+        "levelTo": 172
+      }
+    },
+    {
+      "name": "Razael",
+      "netWorth": 129500,
+      "netWorthRank": 13,
+      "distanceKm": null,
+      "job": null
+    },
+    {
+      "name": "AlmedinDriver",
+      "netWorth": 59300,
+      "netWorthRank": 19,
+      "distanceKm": null,
+      "job": null
+    },
+    {
+      "name": "Shaggy",
+      "netWorth": 8100,
+      "netWorthRank": 37,
+      "distanceKm": null,
+      "job": null
+    },
+    {
+      "name": "Yusuf",
+      "netWorth": null,
+      "netWorthRank": null,
+      "distanceKm": null,
+      "job": null
+    },
+    {
+      "name": "mrx",
+      "netWorth": null,
+      "netWorthRank": null,
+      "distanceKm": 23156,
+      "job": {
+        "km": 304,
+        "time": "1 h 56 m",
+        "fuelL": 109,
+        "income": 5130,
+        "levelFrom": 30,
+        "levelTo": 30
+      }
+    }
+  ]
 }
