@@ -19,7 +19,7 @@ from net_worth import estimate_net_worth, find_net_worth, fmt_money
 from post_joblog import send_joblog
 
 API = "https://discord.com/api/v10"
-MAX_MESSAGES = 300
+MAX_MESSAGES = 1500   # reads far back so older drivers get their first job found
 MAX_SECONDS = int(os.environ.get("MAX_SECONDS", "1500"))
 SCHEMA = 4   # raised so every old screenshot is read again with the fixed rules
 MAX_SPEED = 300   # km per hour, the game allows fast average speeds
@@ -823,7 +823,8 @@ def main():
     index = {j["id"]: i for i, j in enumerate(jobs)}
     # A job with no fuel value is read again on the next runs, up to 3 tries in total
     current = {j["id"] for j in jobs if j.get("v") == SCHEMA and ("fuel" in j or j.get("fuel_tries", 0) >= 3)
-               and (has_real_level(j) or j.get("level_tries", 0) >= LEVEL_RETRIES)}
+               and (has_real_level(j) or j.get("level_tries", 0) >= LEVEL_RETRIES)
+               and (j.get("income", 0) > 0 or j.get("income_tries", 0) >= 3)}
     nojob_ids = set()
     out_of_time = False
     # Oldest first so the newest job ends up last
@@ -856,6 +857,9 @@ def main():
             if "level_now" not in job:
                 before = jobs[index[job_id]] if job_id in index else {}
                 job["level_tries"] = before.get("level_tries", 0) + 1
+            if job.get("income", 0) <= 0:
+                before = jobs[index[job_id]] if job_id in index else {}
+                job["income_tries"] = before.get("income_tries", 0) + 1
             job["author"] = msg["author"]["id"]
             job["name"] = msg["author"].get("global_name") or msg["author"].get("username") or msg["author"]["id"]
             job["ts"] = msg.get("timestamp", "")
@@ -955,9 +959,11 @@ def main():
         m["pen_read"] += 1 if "damage" in j else 0
         m["fuel_est"] = m["fuel_est"] or bool(j.get("fuel_est"))
         m["last"] = j
+        if j["income"] > 0:
+            m["last_paid"] = j
     table = []
     for m in sorted(members.values(), key=lambda x: x["km"], reverse=True):
-        last = m["last"]
+        last = m.get("last_paid") or m["last"]   # a read of 0 income never replaces the last good job
         table.append(
             {
                 "name": m["name"],
