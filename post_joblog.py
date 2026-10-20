@@ -40,5 +40,8 @@ def send_joblog(job):
         json={"embeds": [embed]},
         timeout=20,
     )
+    if not response.ok:
+    print("Discord error", response.status_code, response.text)
+    
     response.raise_for_status()
     return response.json()["id"]
