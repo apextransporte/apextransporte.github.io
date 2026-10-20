@@ -41,7 +41,7 @@ def send_joblog(job):
         timeout=20,
     )
     if not response.ok:
-    print("Discord error", response.status_code, response.text)
-    
+        print("Discord error", response.status_code, response.text)
+
     response.raise_for_status()
     return response.json()["id"]
