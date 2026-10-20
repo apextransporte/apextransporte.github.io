@@ -827,8 +827,8 @@ def main():
                and (j.get("income", 0) > 0 or j.get("income_tries", 0) >= 3)}
     nojob_ids = set()
     out_of_time = False
-    # Oldest first so the newest job ends up last
-    for msg in reversed(messages):
+    # Newest first so new screenshots get read before the time limit
+    for msg in messages:
         if out_of_time:
             break
         for att in msg.get("attachments", []):
