@@ -20,7 +20,7 @@ from post_joblog import send_joblog
 
 API = "https://discord.com/api/v10"
 MAX_MESSAGES = 1500   # reads far back so older drivers get their first job found
-MAX_SECONDS = int(os.environ.get("MAX_SECONDS", "1500"))
+MAX_SECONDS = int(os.environ.get("MAX_SECONDS", "190"))   # the workflow step stops at 5 minutes, so the bot stops itself earlier and saves its progress
 SCHEMA = 4   # raised so every old screenshot is read again with the fixed rules
 MAX_SPEED = 300   # km per hour, the game allows fast average speeds
 MAX_LEVEL = 999   # the game has no level above this, anything higher is a misread
@@ -47,7 +47,7 @@ VARIANTS = [(4, "auto"), (4, "bin135"), (6, "bin160"), (3, "auto"), (6, "auto"),
             (3, "bin160"), (4, "bin160"), (6, "bin135")]
 REACTION_OK = "\u2705"
 REACTION_NO = "\u274c"
-REACTION_SECONDS = 300
+REACTION_SECONDS = 30
 
 
 def request_retry(method, url, token, tries=4):
