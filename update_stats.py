@@ -767,21 +767,31 @@ def card_date(ts):
 
 
 def post_new_jobs(jobs, plan, messages):
-    """Posts each new accepted job to the output channel once."""
+    """Posts each new accepted job to the output channel once, and logs why a job is skipped."""
     if not os.environ.get("DISCORD_OUTPUT_CHANNEL_ID"):
-        print("No output channel set, job cards are not posted")
+        print("No output channel set, add the DISCORD_OUTPUT_CHANNEL_ID secret, job cards are not posted")
         return
     posted = load_json("posted.json", [])
     ok_ids = {m["id"] for m, emoji in plan if emoji == REACTION_OK}
     urls = {m["id"] + "-" + str(a.get("id")): a.get("url", "")
             for m in messages for a in m.get("attachments", [])}
     sent = 0
+    failures = 0
+    skipped = {"no check mark": 0, "already posted": 0, "older than MIN_POST_ID": 0, "run limit": 0}
     for j in jobs:
         mid = j["id"].split("-")[0]
-        if mid not in ok_ids or j["id"] in posted or int(mid) <= MIN_POST_ID:
+        if int(mid) <= MIN_POST_ID:
+            skipped["older than MIN_POST_ID"] += 1
+            continue
+        if mid not in ok_ids:
+            skipped["no check mark"] += 1
+            continue
+        if j["id"] in posted:
+            skipped["already posted"] += 1
             continue
         if sent >= MAX_POSTS_PER_RUN:
-            break
+            skipped["run limit"] += 1
+            continue
         card = {
             "driver": j["name"],
             "company": "Apex",
@@ -798,14 +808,18 @@ def post_new_jobs(jobs, plan, messages):
         try:
             send_joblog(card)
         except Exception as error:
-            print("Post failed:", error)
-            break
+            failures += 1
+            print("Post failed for", j["id"], ":", error)
+            if failures >= 3:
+                print("Three posts failed, the next run tries again")
+                break
+            continue
         posted.append(j["id"])
         sent += 1
         time.sleep(1)
     with open("posted.json", "w", encoding="utf-8") as f:
         json.dump(posted, f)
-    print("Job cards posted:", sent)
+    print("Job cards posted:", sent, "| failed:", failures, "| skipped:", skipped)
 
 
 def note_failure(failed, job_id, kind, why, att, msg):
