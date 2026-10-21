@@ -27,6 +27,8 @@ MAX_LEVEL = 999   # the game has no level above this, anything higher is a misre
 LEVEL_DROP = 2    # a reading just below the earlier level is kept as the screenshot showed it
 LEVEL_SHIFT = 12  # the last two readings of a driver that agree within this many levels back each other up
 LEVEL_JUMP = 40   # a level this far from the driver's other levels is a misread
+MAX_READS = 3     # FIX: a saved job is read again at most this many times, so old jobs never block new ones
+MAX_FAILS = 2     # FIX: an image that fails this many times is skipped until SCHEMA changes
 
 # Job cards are posted to the output channel only for messages newer than this ID
 MIN_POST_ID = 1559717373542400000
@@ -806,6 +808,27 @@ def post_new_jobs(jobs, plan, messages):
     print("Job cards posted:", sent)
 
 
+def note_failure(failed, job_id, kind, why, att, msg):
+    """FIX: remember an image that could not be read, so it stops eating the time budget every run."""
+    old = failed.get(job_id, {})
+    failed[job_id] = {
+        "v": SCHEMA,
+        "tries": old.get("tries", 0) + 1,
+        "kind": kind,
+        "why": why[:140],
+        "file": att.get("filename", ""),
+        "w": att.get("width"),
+        "h": att.get("height"),
+        "size": att.get("size"),
+        "posted": msg.get("timestamp", ""),
+    }
+
+
+def skip_failed(failed, job_id):
+    entry = failed.get(job_id)
+    return bool(entry) and entry.get("v") == SCHEMA and entry.get("tries", 0) >= MAX_FAILS
+
+
 def main():
     started = time.time()
     token = os.environ["DISCORD_BOT_TOKEN"]
@@ -816,15 +839,19 @@ def main():
 
     # Jobs from an older version stay in the file until they are read again with the new fields
     jobs = load_json("jobs.json", [])
+    failed = load_json("failed_images.json", {})
     for j in jobs:  # estimates are made again on every run
         if j.get("fuel_est"):
             j.pop("fuel", None)
             j.pop("fuel_est", None)
     index = {j["id"]: i for i, j in enumerate(jobs)}
     # A job with no fuel value is read again on the next runs, up to 3 tries in total
-    current = {j["id"] for j in jobs if j.get("v") == SCHEMA and ("fuel" in j or j.get("fuel_tries", 0) >= 3)
-               and (has_real_level(j) or j.get("level_tries", 0) >= LEVEL_RETRIES)
-               and (j.get("income", 0) > 0 or j.get("income_tries", 0) >= 3)}
+    # FIX: MAX_READS caps every job, so a job whose level is dropped again and again no longer loops forever
+    current = {j["id"] for j in jobs if j.get("v") == SCHEMA and (
+        j.get("reads", 0) >= MAX_READS or (
+            ("fuel" in j or j.get("fuel_tries", 0) >= 3)
+            and (has_real_level(j) or j.get("level_tries", 0) >= LEVEL_RETRIES)
+            and (j.get("income", 0) > 0 or j.get("income_tries", 0) >= 3)))}
     nojob_ids = set()
     out_of_time = False
     # Newest first so new screenshots get read before the time limit
@@ -835,30 +862,36 @@ def main():
             job_id = msg["id"] + "-" + str(att.get("id"))
             if job_id in current or not is_image(att):
                 continue
+            if skip_failed(failed, job_id):
+                if failed[job_id].get("kind") == "nojob":
+                    nojob_ids.add(msg["id"])
+                continue
             if time.time() - started > MAX_SECONDS:
                 print("Time limit reached, the next run continues from here")
                 out_of_time = True
                 break
             try:
-                img_bytes = requests.get(att["url"], timeout=60).content
+                img_bytes = requests.get(att["url"], timeout=25).content
                 job = parse_job(img_bytes)
             except Exception as e:
                 print("Could not read", job_id, e)
+                note_failure(failed, job_id, "error", repr(e), att, msg)
                 continue
             if job is None:
                 print("No numbers found in", job_id)
+                note_failure(failed, job_id, "nojob", "no job numbers found by the reader", att, msg)
                 nojob_ids.add(msg["id"])
                 continue
+            failed.pop(job_id, None)
+            before = jobs[index[job_id]] if job_id in index else {}
             job["id"] = job_id
             job["v"] = SCHEMA
+            job["reads"] = before.get("reads", 0) + 1
             if "fuel" not in job:
-                before = jobs[index[job_id]] if job_id in index else {}
                 job["fuel_tries"] = before.get("fuel_tries", 0) + 1
             if "level_now" not in job:
-                before = jobs[index[job_id]] if job_id in index else {}
                 job["level_tries"] = before.get("level_tries", 0) + 1
             if job.get("income", 0) <= 0:
-                before = jobs[index[job_id]] if job_id in index else {}
                 job["income_tries"] = before.get("income_tries", 0) + 1
             job["author"] = msg["author"]["id"]
             job["name"] = msg["author"].get("global_name") or msg["author"].get("username") or msg["author"]["id"]
@@ -992,6 +1025,39 @@ def main():
         if not lookup_net_worth(net_worth, m["name"], m["author"], manual_net_worth):
             print("No net worth for:", m["name"], "Discord ID:", m["author"],
                   "-> add it to net_worth_manual.json")
+
+    # FIX: a small report so a silent stop can be found without reading the Actions log
+    saved_ids = {j["id"] for j in saved_jobs}
+    newest = []
+    for msg in messages[:40]:
+        for att in msg.get("attachments", []):
+            if not is_image(att):
+                continue
+            jid = msg["id"] + "-" + str(att.get("id"))
+            if jid in saved_ids:
+                status = "saved"
+            elif jid in failed:
+                status = "failed " + failed[jid].get("kind", "") + " x" + str(failed[jid].get("tries", 0))
+            else:
+                status = "waiting"
+            newest.append({"posted": msg.get("timestamp", ""), "status": status,
+                           "file": att.get("filename", ""), "w": att.get("width"), "h": att.get("height")})
+    waiting = sum(1 for msg in messages for att in msg.get("attachments", [])
+                  if is_image(att) and msg["id"] + "-" + str(att.get("id")) not in current
+                  and not skip_failed(failed, msg["id"] + "-" + str(att.get("id"))))
+    diag = {
+        "messages_loaded": len(messages),
+        "newest_message": messages[0].get("timestamp", "") if messages else "",
+        "newest_saved_job": max((j.get("ts", "") for j in saved_jobs), default=""),
+        "time_limit_hit": out_of_time,
+        "images_waiting": waiting,
+        "images_failed": len(failed),
+        "newest_images": newest[:8],
+    }
+    with open("diag.json", "w", encoding="utf-8") as f:
+        json.dump(diag, f, ensure_ascii=False, indent=1)
+    with open("failed_images.json", "w", encoding="utf-8") as f:
+        json.dump(failed, f, ensure_ascii=False)
 
     with open("jobs.json", "w", encoding="utf-8") as f:
         json.dump(saved_jobs, f, ensure_ascii=False)
