@@ -302,8 +302,9 @@ footer a{margin-right:18px}
   <section id="crew"><div class="wrap">
     <h2>Meet the crew</h2>
     <p class="sub" style="margin-bottom:8px">The staff who run Apex Transporte.</p>
-    <p class="sub"><b>Total staff on board: 13</b></p>
+    <p class="sub"><b>Total staff on board: 14</b></p>
     <div class="staff"><p class="stier">Leadership</p><div class="sgrid lead"><div class="scard" data-name="Apex_ReX"><span class="sav" aria-hidden="true">A</span><div class="sbody"><b class="sname">Apex_ReX</b><div class="sroles"><span class="rl main">Founder</span><span class="rl">Upper management</span><span class="rl">Skin team</span></div><small class="sdist" hidden></small></div></div><div class="scard" data-name="Corprate keem"><span class="sav" aria-hidden="true">C</span><div class="sbody"><b class="sname">Corprate keem</b><div class="sroles"><span class="rl main">CEO</span><span class="rl">Upper management</span></div><small class="sdist" hidden></small></div></div><div class="scard" data-name="The Sunny"><span class="sav" aria-hidden="true">T</span><div class="sbody"><b class="sname">The Sunny</b><div class="sroles"><span class="rl main">Vice CEO</span><span class="rl">Upper management</span></div><small class="sdist" hidden></small></div></div><div class="scard" data-name="Niel"><span class="sav" aria-hidden="true">N</span><div class="sbody"><b class="sname">Niel</b><div class="sroles"><span class="rl main">Manager</span><span class="rl">Upper management</span></div><small class="sdist" hidden></small></div></div></div><p class="stier">Team</p><div class="sgrid"><div class="scard" data-name="Rønin"><span class="sav" aria-hidden="true">R</span><div class="sbody"><b class="sname">Rønin</b><div class="sroles"><span class="rl main">Moderator</span></div><small class="sdist" hidden></small></div></div><div class="scard" data-name="General"><span class="sav" aria-hidden="true">G</span><div class="sbody"><b class="sname">General</b><div class="sroles"><span class="rl main">Moderator</span></div><small class="sdist" hidden></small></div></div><div class="scard" data-name="The-T"><span class="sav" aria-hidden="true">T</span><div class="sbody"><b class="sname">The-T</b><div class="sroles"><span class="rl main">Support team</span></div><small class="sdist" hidden></small></div></div><div class="scard" data-name="Goku black"><span class="sav" aria-hidden="true">G</span><div class="sbody"><b class="sname">Goku black</b><div class="sroles"><span class="rl main">Support team</span></div><small class="sdist" hidden></small></div></div><div class="scard" data-name="Razael"><span class="sav" aria-hidden="true">R</span><div class="sbody"><b class="sname">Razael</b><div class="sroles"><span class="rl main">Skin team</span></div><small class="sdist" hidden></small></div></div><div class="scard" data-name="VU"><span class="sav" aria-hidden="true">V</span><div class="sbody"><b class="sname">VU</b><div class="sroles"><span class="rl main">Skin team</span></div><small class="sdist" hidden></small></div></div><div class="scard" data-name="sbuda 101"><span class="sav" aria-hidden="true">S</span><div class="sbody"><b class="sname">sbuda 101</b><div class="sroles"><span class="rl main">Skin team</span></div><small class="sdist" hidden></small></div></div><div class="scard" data-name="🥷𝐀𝐩𝐞𝐱&lt;&gt;𝐇𝐞𝐫𝐨🇬🇭🥷"><span class="sav" aria-hidden="true">A</span><div class="sbody"><b class="sname">🥷𝐀𝐩𝐞𝐱&lt;&gt;𝐇𝐞𝐫𝐨🇬🇭🥷</b><div class="sroles"><span class="rl main">Skin team</span></div><small class="sdist" hidden></small></div></div>
+<div class="scard" data-name="APEX&lt;&gt;ANAS"><span class="sav" aria-hidden="true">A</span><div class="sbody"><b class="sname">APEX&lt;&gt;ANAS</b><div class="sroles"><span class="rl main">Skin team</span></div><small class="sdist" hidden></small></div></div>
 <div class="scard" data-name="Asad"><span class="sav" aria-hidden="true">A</span><div class="sbody"><b class="sname">Asad</b><div class="sroles"><span class="rl main">Social Media Manager</span></div><small class="sdist" hidden></small></div></div></div></div>
     <h3 class="dh">Driver directory</h3>
     <div class="dbar">
@@ -906,8 +907,8 @@ const APEX_FEED_URL = "";
 <script>
 (function () {
   var table = document.getElementById("jobsTable");
-  var cards = [].slice.call(document.querySelectorAll(".scard"));
-  if (!table || !cards.length) return;
+  function getCards() { return [].slice.call(document.querySelectorAll(".scard")); }
+  if (!table || !getCards().length) return;
   function n2(s) {
     return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\u00f8/gi, "o")
       .toLowerCase().replace(/^apex_/, "").replace(/[^a-z0-9]/g, "");
@@ -918,7 +919,7 @@ const APEX_FEED_URL = "";
       var b = r.querySelector("b");
       if (b) rows[n2(b.textContent)] = r;
     });
-    cards.forEach(function (c) {
+    getCards().forEach(function (c) {
       var r = rows[n2(c.getAttribute("data-name"))];
       var el = r && r.querySelector('[data-l="Total distance"]');
       var t = el ? el.textContent.trim() : "";
@@ -930,6 +931,7 @@ const APEX_FEED_URL = "";
   var timer;
   new MutationObserver(function () { clearTimeout(timer); timer = setTimeout(fill, 400); })
     .observe(table, { childList: true, subtree: true, characterData: true });
+  window.__apexFillStaff = fill;
   fill();
   setTimeout(fill, 1800);
   setTimeout(fill, 4800);
@@ -1273,6 +1275,57 @@ dl.notes dd{margin:0;font-weight:600;text-align:right}
       if(table)new MutationObserver(clean).observe(table,{childList:true});
     })
     .catch(function(){/* members.json missing: nothing is hidden */});
+})();
+</script>
+
+<script>
+(function(){
+  /* Builds the Meet the crew cards from staff.json. The Discord bot rewrites staff.json from server roles, so joins, leaves and role changes show up on their own. */
+  function nz(s){return String(s||"").normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]/gu,"");}
+  function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+  function setRoles(card,roles){
+    var box=card.querySelector(".sroles");
+    if(!box){box=el("div","sroles");card.querySelector(".sbody").insertBefore(box,card.querySelector(".sdist"));}
+    box.textContent="";
+    roles.forEach(function(r,i){box.appendChild(el("span",i===0?"rl main":"rl",r));});
+  }
+  function makeCard(name){
+    var c=el("div","scard");c.setAttribute("data-name",name);
+    var av=el("span","sav",(Array.from(name.trim())[0]||"?").toUpperCase());av.setAttribute("aria-hidden","true");
+    var body=el("div","sbody");body.appendChild(el("b","sname",name));
+    var d=el("small","sdist");d.hidden=true;body.appendChild(d);
+    c.appendChild(av);c.appendChild(body);return c;
+  }
+  function render(list){
+    var staff=document.querySelector("#crew .staff");if(!staff)return;
+    var have={};
+    [].slice.call(staff.querySelectorAll(".scard")).forEach(function(c){have[nz(c.getAttribute("data-name"))]=c;});
+    var lead=[],team=[];
+    list.forEach(function(p){
+      if(!p||!p.name||!p.roles||!p.roles.length)return;
+      var c=have[nz(p.name)]||makeCard(p.name);
+      setRoles(c,p.roles);
+      (p.tier==="lead"?lead:team).push(c);
+    });
+    if(!lead.length&&!team.length)return;
+    staff.textContent="";
+    function tier(label,cards,isLead){
+      if(!cards.length)return;
+      staff.appendChild(el("p","stier",label));
+      var g=el("div",isLead?"sgrid lead":"sgrid");
+      cards.forEach(function(c){g.appendChild(c);});
+      staff.appendChild(g);
+    }
+    tier("Leadership",lead,true);
+    tier("Team",team,false);
+    var tot=document.querySelector("#crew .sub b");
+    if(tot&&/Total staff/.test(tot.textContent))tot.textContent="Total staff on board: "+(lead.length+team.length);
+    if(window.__apexFillStaff)window.__apexFillStaff();
+  }
+  fetch("staff.json?v="+Date.now(),{cache:"no-store"})
+    .then(function(r){return r.json();})
+    .then(function(d){render(d.staff||[]);})
+    .catch(function(){/* staff.json missing: the cards in the page stay as they are */});
 })();
 </script>
 
