@@ -1,6 +1,22 @@
 {
   "staff": [
     {
+      "name": "Apex_ReX🇹🇷",
+      "roles": [
+        "Founder",
+        "Upper management"
+      ],
+      "tier": "lead"
+    },
+    {
+      "name": "Apex | keem",
+      "roles": [
+        "CEO",
+        "Upper management"
+      ],
+      "tier": "lead"
+    },
+    {
       "name": "APEX || Sunny ™",
       "roles": [
         "Vice CEO",
@@ -13,23 +29,6 @@
       "roles": [
         "Manager",
         "Upper management"
-      ],
-      "tier": "lead"
-    },
-    {
-      "name": "Apex | keem",
-      "roles": [
-        "Upper management",
-        "Support team",
-        "Skin team"
-      ],
-      "tier": "lead"
-    },
-    {
-      "name": "Apex_ReX🇹🇷",
-      "roles": [
-        "Upper management",
-        "Skin team"
       ],
       "tier": "lead"
     },
