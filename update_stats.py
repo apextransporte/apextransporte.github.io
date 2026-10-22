@@ -6,8 +6,11 @@ import re
 import time
 import urllib.parse
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from statistics import median
 from datetime import datetime, timedelta, timezone
+
+os.environ.setdefault("OMP_THREAD_LIMIT", "1")   # FAST: one Tesseract thread per image, several images run side by side
 
 import numpy as np
 import requests
@@ -28,6 +31,7 @@ LEVEL_DROP = 2    # a reading just below the earlier level is kept as the screen
 LEVEL_SHIFT = 12  # the last two readings of a driver that agree within this many levels back each other up
 LEVEL_JUMP = 40   # a level this far from the driver's other levels is a misread
 MAX_READS = 3     # FIX: a saved job is read again at most this many times, so old jobs never block new ones
+OCR_WORKERS = 4   # FAST: the fields of one screenshot are read side by side
 MAX_FAILS = 2     # FIX: an image that fails this many times is skipped until SCHEMA changes
 
 # Job cards are posted to the output channel only for messages newer than this ID
@@ -279,6 +283,8 @@ def read_penalty(arr, box):
                 value = parse_money(text)
                 if value:
                     results.append(value)
+                if len(results) >= 3 and len(set(results)) == 1:
+                    return results[0]   # FAST: three equal readings are enough
     return Counter(results).most_common(1)[0][0] if results else 0
 
 
@@ -473,19 +479,27 @@ def parse_job(image_bytes):
     layout = get_layout(mn, img.width, img.height)
     b = layout["boxes"]
 
-    km = vote(inner(mn, b["distance"]), parse_km)
-    minutes = vote(inner(mn, b["time"]), parse_time)
-    income = vote(inner(mn, b["income"]), parse_money)
+    # FAST: the three main fields are read side by side
+    with ThreadPoolExecutor(max_workers=OCR_WORKERS) as pool:
+        f_km = pool.submit(vote, inner(mn, b["distance"]), parse_km)
+        f_min = pool.submit(vote, inner(mn, b["time"]), parse_time)
+        f_inc = pool.submit(vote, inner(mn, b["income"]), parse_money)
+        km, minutes, income = f_km.result(), f_min.result(), f_inc.result()
     print("OCR:", {"km": km, "minutes": minutes, "income": income, "layout_found": layout["found"]})
     if km is None or minutes is None or income is None:
         return None
 
     job = {"km": km, "minutes": minutes, "income": income}
-    job["fuel"] = read_fuel(mn, b["fuel"], fix_km(km, minutes)[0])
-    job["damage"] = read_penalty(arr, b["damage"])
-    job["time_penalty"] = read_penalty(arr, b["time_penalty"])
-
-    level = read_level(gray, layout)
+    # FAST: fuel, both penalties and the level are read side by side
+    with ThreadPoolExecutor(max_workers=OCR_WORKERS) as pool:
+        f_fuel = pool.submit(read_fuel, mn, b["fuel"], fix_km(km, minutes)[0])
+        f_dmg = pool.submit(read_penalty, arr, b["damage"])
+        f_tp = pool.submit(read_penalty, arr, b["time_penalty"])
+        f_lvl = pool.submit(read_level, gray, layout)
+        job["fuel"] = f_fuel.result()
+        job["damage"] = f_dmg.result()
+        job["time_penalty"] = f_tp.result()
+        level = f_lvl.result()
     if level:
         job["level"] = "{} to {}".format(level[0], level[1])
         job["level_now"] = level[0]   # the left number on the bar is the driver level
@@ -495,7 +509,7 @@ def parse_job(image_bytes):
 
 # ---------- Discord ----------
 
-def fetch_messages(token, channel):
+def fetch_messages(token, channel, is_done=None):
     messages = []
     before = None
     while len(messages) < MAX_MESSAGES:
@@ -513,7 +527,9 @@ def fetch_messages(token, channel):
             break
         messages.extend(batch)
         before = batch[-1]["id"]
-        time.sleep(1)  # stay under the Discord rate limit
+        if is_done and all(is_done(m) for m in batch):
+            break   # FAST: a page with nothing new means the older pages are already saved
+        time.sleep(0.3)  # stay under the Discord rate limit
     return messages
 
 
@@ -816,7 +832,7 @@ def post_new_jobs(jobs, plan, messages):
             continue
         posted.append(j["id"])
         sent += 1
-        time.sleep(1)
+        time.sleep(0.5)
     with open("posted.json", "w", encoding="utf-8") as f:
         json.dump(posted, f)
     print("Job cards posted:", sent, "| failed:", failures, "| skipped:", skipped)
@@ -843,13 +859,34 @@ def skip_failed(failed, job_id):
     return bool(entry) and entry.get("v") == SCHEMA and entry.get("tries", 0) >= MAX_FAILS
 
 
+def finalize_jobs(jobs):
+    """Every saved job gets the sanity fixes, including jobs saved by earlier runs."""
+    for j in jobs:
+        sanitize(j)
+    fixes = load_json("job_corrections.json", {})  # figures read from the game screen by a person win over the reader
+    for j in jobs:
+        for key, val in fixes.get(j.get("id"), {}).items():
+            j[key] = val
+    fill_fuel(jobs)
+    jobs.sort(key=lambda j: j.get("ts", ""))
+    use_left_level(jobs)
+    fix_levels(jobs)
+    fill_levels(jobs)
+    mark_duplicates(jobs)
+
+
+def publish_cards(jobs, messages, nojob_ids):
+    """FAST: cleans the jobs and posts the new job cards. Safe to call twice, a card is posted once."""
+    finalize_jobs(jobs)
+    plan = build_reaction_plan(messages, jobs, nojob_ids)
+    post_new_jobs(jobs, plan, messages)
+    return plan
+
+
 def main():
     started = time.time()
     token = os.environ["DISCORD_BOT_TOKEN"]
     channel = os.environ["DISCORD_STATS_CHANNEL_ID"]
-
-    messages = fetch_messages(token, channel)
-    print("Messages found:", len(messages))
 
     # Jobs from an older version stay in the file until they are read again with the new fields
     jobs = load_json("jobs.json", [])
@@ -866,12 +903,34 @@ def main():
             ("fuel" in j or j.get("fuel_tries", 0) >= 3)
             and (has_real_level(j) or j.get("level_tries", 0) >= LEVEL_RETRIES)
             and (j.get("income", 0) > 0 or j.get("income_tries", 0) >= 3)))}
+
+    def msg_done(msg):
+        """FAST: true when every image of a message is already saved or given up on."""
+        for att in msg.get("attachments", []):
+            if not is_image(att):
+                continue
+            jid = msg["id"] + "-" + str(att.get("id"))
+            if jid not in current and not skip_failed(failed, jid):
+                return False
+        return True
+
+    # FAST: loading stops at the first page with nothing new, so a normal run loads one page
+    messages = fetch_messages(token, channel, msg_done)
+    print("Messages found:", len(messages))
+
     nojob_ids = set()
     out_of_time = False
+    posted_early = False
     # Newest first so new screenshots get read before the time limit
     for msg in messages:
         if out_of_time:
             break
+        if not posted_early and int(msg["id"]) <= MIN_POST_ID:
+            # FAST: every new screenshot is read, so the cards go out before the old backlog is read
+            posted_early = True
+            publish_cards(jobs, messages, nojob_ids)
+            index.clear()
+            index.update({j["id"]: i for i, j in enumerate(jobs)})   # the jobs were sorted, so the positions changed
         for att in msg.get("attachments", []):
             job_id = msg["id"] + "-" + str(att.get("id"))
             if job_id in current or not is_image(att):
@@ -918,23 +977,11 @@ def main():
             current.add(job_id)
             print("Saved job:", job)
 
-    # Every saved job gets the sanity fixes, including jobs saved by earlier runs
-    for j in jobs:
-        sanitize(j)
-    fixes = load_json("job_corrections.json", {})  # figures read from the game screen by a person win over the reader
-    for j in jobs:
-        for key, val in fixes.get(j.get("id"), {}).items():
-            j[key] = val
-    fill_fuel(jobs)
-    jobs.sort(key=lambda j: j.get("ts", ""))
-    use_left_level(jobs)
-    fix_levels(jobs)
-    fill_levels(jobs)
-    mark_duplicates(jobs)
+    # Cards first, then reactions, so a reaction never delays a card
+    plan = publish_cards(jobs, messages, nojob_ids)
 
     # Reactions: check mark for new job logs, X for repeats and for images with no job log
     reaction_start = time.time()
-    plan = build_reaction_plan(messages, jobs, nojob_ids)
     done = 0
     for msg, emoji in plan:
         if time.time() - reaction_start > REACTION_SECONDS:
@@ -944,8 +991,6 @@ def main():
             break
         done += 1
     print("Reactions handled:", done, "of", len(plan))
-
-    post_new_jobs(jobs, plan, messages)
 
     # Repeated screenshots stay in jobs.json but never count in any total
     saved_jobs = jobs
