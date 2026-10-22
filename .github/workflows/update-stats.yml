@@ -28,8 +28,7 @@ jobs:
 
       - name: Install Tesseract
         run: |
-          sudo apt-get update
-          sudo apt-get install -y tesseract-ocr
+          sudo apt-get install -y --no-install-recommends tesseract-ocr || (sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr)
 
       - name: Install packages
         run: pip install -r requirements.txt
