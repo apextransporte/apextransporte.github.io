@@ -31,6 +31,16 @@ ROLE_ORDER = [
 # People holding any of these roles show under Leadership.
 LEAD_ROLES = {"Founder", "CEO", "Vice CEO", "Manager", "Upper management"}
 
+# Fixed leadership titles and order. Discord has no Founder or CEO role,
+# so these are matched by a word in the member name. A person only matches
+# when they already hold a leadership role in Discord.
+LEAD_TITLES = [
+    ("rex", "Founder"),
+    ("keem", "CEO"),
+    ("sunny", "Vice CEO"),
+    ("niel", "Manager"),
+]
+
 
 def call(path):
     req = urllib.request.Request(
@@ -62,6 +72,20 @@ def display_name(m):
     return m.get("nick") or u.get("global_name") or u.get("username") or ""
 
 
+def name_tokens(name):
+    out, cur = [], ""
+    for ch in name.lower():
+        if ch.isalnum():
+            cur += ch
+        else:
+            if cur:
+                out.append(cur)
+            cur = ""
+    if cur:
+        out.append(cur)
+    return out
+
+
 def main():
     guild_id = call("/channels/%s" % CHANNEL_ID)["guild_id"]
     roles = {r["id"]: r["name"] for r in call("/guilds/%s/roles" % guild_id)}
@@ -84,7 +108,17 @@ def main():
         if not name:
             continue
         tier = "lead" if any(h in LEAD_ROLES for h in held) else "team"
-        staff.append({"name": name, "roles": held, "tier": tier, "_r": rank[held[0].lower()]})
+        sort_key = rank[held[0].lower()]
+        if tier == "lead":
+            toks = name_tokens(name)
+            for i, (key, title) in enumerate(LEAD_TITLES):
+                if key in toks:
+                    held = [title] + [h for h in held if h not in ("Founder", "CEO", "Vice CEO", "Manager", title)]
+                    sort_key = i
+                    break
+            else:
+                sort_key = 100 + sort_key
+        staff.append({"name": name, "roles": held, "tier": tier, "_r": sort_key})
 
     staff.sort(key=lambda p: (p["tier"] != "lead", p["_r"], p["name"].lower()))
     for p in staff:
