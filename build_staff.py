@@ -41,6 +41,41 @@ LEAD_TITLES = [
     ("niel", "Manager"),
 ]
 
+# Other spellings of a role name in Discord. Emojis, spaces and capitals are
+# ignored when matching, so "Moderator", "MODERATORS" and "🛡️ Moderator" all work.
+ALIASES = {
+    "moderators": "Moderator",
+    "mod": "Moderator",
+    "mods": "Moderator",
+    "staffmoderator": "Moderator",
+    "support": "Support team",
+    "supports": "Support team",
+    "supportteam": "Support team",
+    "skin": "Skin team",
+    "skins": "Skin team",
+    "skinteam": "Skin team",
+    "skinner": "Skin team",
+    "skindesigner": "Skin team",
+    "socialmedia": "Social Media Manager",
+    "socialmediamanager": "Social Media Manager",
+}
+
+
+def norm(text):
+    return "".join(ch for ch in str(text).lower() if ch.isalnum())
+
+
+def match_role(role_name):
+    n = norm(role_name)
+    for official in ROLE_ORDER:
+        if norm(official) == n:
+            return official
+    if n in ALIASES:
+        return ALIASES[n]
+    if "moderator" in n:
+        return "Moderator"
+    return None
+
 
 def call(path):
     req = urllib.request.Request(
@@ -90,7 +125,7 @@ def main():
     guild_id = call("/channels/%s" % CHANNEL_ID)["guild_id"]
     roles = {r["id"]: r["name"] for r in call("/guilds/%s/roles" % guild_id)}
     rank = {name.lower(): i for i, name in enumerate(ROLE_ORDER)}
-    canon = {name.lower(): name for name in ROLE_ORDER}
+    print("Server roles found:", ", ".join(sorted(roles.values())))
 
     staff = []
     for m in all_members(guild_id):
@@ -98,9 +133,9 @@ def main():
             continue
         held = []
         for rid in m.get("roles", []):
-            n = roles.get(rid, "")
-            if n.lower() in rank:
-                held.append(canon[n.lower()])
+            official = match_role(roles.get(rid, ""))
+            if official and official not in held:
+                held.append(official)
         if not held:
             continue
         held.sort(key=lambda n: rank[n.lower()])
