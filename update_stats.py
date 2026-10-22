@@ -788,6 +788,7 @@ def post_new_jobs(jobs, plan, messages):
         print("No output channel set, add the DISCORD_OUTPUT_CHANNEL_ID secret, job cards are not posted")
         return
     posted = load_json("posted.json", [])
+    posted_set = set(posted)
     ok_ids = {m["id"] for m, emoji in plan if emoji == REACTION_OK}
     urls = {m["id"] + "-" + str(a.get("id")): a.get("url", "")
             for m in messages for a in m.get("attachments", [])}
@@ -802,7 +803,10 @@ def post_new_jobs(jobs, plan, messages):
         if mid not in ok_ids:
             skipped["no check mark"] += 1
             continue
-        if j["id"] in posted:
+        # FIX: a card is also blocked when the same driver, distance, time and income was posted before,
+        # so a screenshot read slightly differently the second time never makes a repeat card
+        key = "key:{}|{}|{}|{}".format(j["author"], j["km"], j["minutes"], j["income"])
+        if j["id"] in posted_set or key in posted_set:
             skipped["already posted"] += 1
             continue
         if sent >= MAX_POSTS_PER_RUN:
@@ -830,8 +834,11 @@ def post_new_jobs(jobs, plan, messages):
                 print("Three posts failed, the next run tries again")
                 break
             continue
-        posted.append(j["id"])
+        posted.extend([j["id"], key])
+        posted_set.update([j["id"], key])
         sent += 1
+        with open("posted.json", "w", encoding="utf-8") as f:   # FIX: saved after every card, so a stopped run never forgets one
+            json.dump(posted, f)
         time.sleep(0.5)
     with open("posted.json", "w", encoding="utf-8") as f:
         json.dump(posted, f)
