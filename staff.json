@@ -33,6 +33,20 @@
       "tier": "lead"
     },
     {
+      "name": "Apex | GENERAL",
+      "roles": [
+        "Moderator"
+      ],
+      "tier": "team"
+    },
+    {
+      "name": "APEX | Rønin",
+      "roles": [
+        "Moderator"
+      ],
+      "tier": "team"
+    },
+    {
       "name": "Apex | The-T",
       "roles": [
         "Support team",
