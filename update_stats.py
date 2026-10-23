@@ -598,11 +598,12 @@ def build_rankings(jobs, table):
     clean_rank.sort(key=lambda r: (r["clean"], r["clean"] / r["jobs"]), reverse=True)
 
     # 3. Worst delivery rank: the single jobs with the highest damage plus time penalty
-    worst = []
-    for j in jobs:
+    worst, seen_drivers = [], set()
+    for j in sorted(jobs, key=lambda x: sum(job_penalties(x) or (0, 0)), reverse=True):
         pen = job_penalties(j)
-        if pen is None or sum(pen) == 0:
-            continue
+        if pen is None or sum(pen) == 0 or j["author"] in seen_drivers:
+            continue   # one entry per driver, the driver's single worst job
+        seen_drivers.add(j["author"])
         worst.append({"name": j["name"], "date": j.get("ts", ""), "km": "{} km".format(j["km"]),
                       "damage": "\u20ac{:,}".format(pen[0]), "time_penalty": "\u20ac{:,}".format(pen[1]),
                       "total": "\u20ac{:,}".format(sum(pen)), "_sort": sum(pen)})
