@@ -265,6 +265,26 @@ def board_embed(title, emoji, drivers, key, unit="", daily=False):
     )
 
 
+def delivery_embed(kind, rankings):
+    """Clean delivery rank or worst delivery rank, read from the rankings block of data.json."""
+    rows = (rankings or {}).get(kind) or []
+    lines = []
+    if kind == "clean":
+        title = "\U0001F9FC  CLEANEST DRIVERS  \u2728"
+        legend = "Jobs with no damage and no time penalty"
+        for i, r in enumerate(rows[:10], start=1):
+            lines.append(f"{RANKS.get(i, DOT)}  **{r['name']}**\n> {r['clean']} clean of {r['jobs']} jobs   |   {r['rate']}")
+    else:
+        title = "\U0001F4A5  WORST DELIVERIES  \u26A0\uFE0F"
+        legend = "Highest damage plus time penalty on one job"
+        for i, r in enumerate(rows[:10], start=1):
+            date = str(r.get("date", ""))[:10]
+            lines.append(f"{RANKS.get(i, DOT)}  **{r['name']}**  \u2022  {r['total']}\n"
+                         f"> Damage {r['damage']}   |   Time {r['time_penalty']}   |   {r['km']}   |   {date}")
+    body = "\n\n".join(lines) or "No data yet."
+    return discord.Embed(title=title, description=f"{legend}\n{DIVIDER}\n\n{body}", color=RED)
+
+
 def active_embed(drivers):
     """Drivers who logged a job in the last 24 hours."""
     cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=24)
@@ -507,7 +527,7 @@ async def joblog_autocomplete(interaction: discord.Interaction, current: str):
     return [app_commands.Choice(name=n[:100], value=n[:100]) for n in found[:25]]
 
 
-@bot.tree.command(name="leaderboard", description="Show the top 5 Apex drivers")
+@bot.tree.command(name="leaderboard", description="Show Apex driver rankings")
 @app_commands.describe(category="What to rank by")
 @app_commands.choices(
     category=[
@@ -516,6 +536,8 @@ async def joblog_autocomplete(interaction: discord.Interaction, current: str):
         app_commands.Choice(name="Net worth", value="net_worth"),
         app_commands.Choice(name="Income", value="income"),
         app_commands.Choice(name="Driving time", value="time"),
+        app_commands.Choice(name="Clean deliveries", value="clean"),
+        app_commands.Choice(name="Worst deliveries", value="worst"),
     ]
 )
 async def leaderboard(
@@ -529,6 +551,12 @@ async def leaderboard(
         drivers = await load_drivers()
     except Exception:
         await interaction.followup.send(DATA_ERROR)
+        return
+    if key in ("clean", "worst"):
+        raw = _cache.get("raw")
+        rankings = raw.get("rankings") if isinstance(raw, dict) else None
+        embed = style(delivery_embed(key, rankings))
+        await interaction.followup.send(embed=embed, file=logo_file())
         return
     emojis = {"distance": "\U0001F6E3\uFE0F", "level": "\u2B50", "net_worth": "\U0001F4B0",
               "income": "\U0001F4B5", "time": "\u23F1\uFE0F"}
