@@ -551,6 +551,69 @@ def fmt_time(minutes):
     return "{} h {} m".format(minutes // 60, minutes % 60)
 
 
+MAX_PENALTY = 30000      # a damage or time penalty above this is a misread, so it never enters the ranks
+MIN_RANKED_JOBS = 5      # a driver needs this many read jobs to enter the clean rank
+RANK_SIZE = 10
+
+
+def job_penalties(j):
+    """Returns (damage, time_penalty) or None when the job has no usable penalty reading."""
+    if "damage" not in j or "time_penalty" not in j:
+        return None
+    d, t = j.get("damage", 0), j.get("time_penalty", 0)
+    if d > MAX_PENALTY or t > MAX_PENALTY:
+        return None
+    return d, t
+
+
+def build_rankings(jobs, table):
+    """Level rank, clean delivery rank and worst delivery rank, written to data.json."""
+    # 1. Level rank, from the same level the member table shows
+    level_rank = []
+    for row in table:
+        try:
+            lvl = int(row.get("level"))
+        except (TypeError, ValueError):
+            continue
+        level_rank.append({"name": row["name"], "level": lvl, "distance": row["distance"]})
+    level_rank.sort(key=lambda r: r["level"], reverse=True)
+
+    # 2. Clean delivery rank: jobs with no damage penalty and no time penalty
+    stats = {}
+    for j in jobs:
+        pen = job_penalties(j)
+        if pen is None:
+            continue
+        s = stats.setdefault(j["author"], {"name": j["name"], "jobs": 0, "clean": 0})
+        s["name"] = j["name"]
+        s["jobs"] += 1
+        if pen == (0, 0):
+            s["clean"] += 1
+    clean_rank = []
+    for s in stats.values():
+        if s["jobs"] < MIN_RANKED_JOBS:
+            continue
+        clean_rank.append({"name": s["name"], "clean": s["clean"], "jobs": s["jobs"],
+                           "rate": "{}%".format(round(100 * s["clean"] / s["jobs"]))})
+    clean_rank.sort(key=lambda r: (r["clean"], r["clean"] / r["jobs"]), reverse=True)
+
+    # 3. Worst delivery rank: the single jobs with the highest damage plus time penalty
+    worst = []
+    for j in jobs:
+        pen = job_penalties(j)
+        if pen is None or sum(pen) == 0:
+            continue
+        worst.append({"name": j["name"], "date": j.get("ts", ""), "km": "{} km".format(j["km"]),
+                      "damage": "\u20ac{:,}".format(pen[0]), "time_penalty": "\u20ac{:,}".format(pen[1]),
+                      "total": "\u20ac{:,}".format(sum(pen)), "_sort": sum(pen)})
+    worst.sort(key=lambda r: r["_sort"], reverse=True)
+    for r in worst:
+        r.pop("_sort")
+
+    return {"level": level_rank[:RANK_SIZE], "clean": clean_rank[:RANK_SIZE], "worst": worst[:RANK_SIZE]}
+
+
+
 def clean_name(name):
     """'APEX | Kretek' and '[APEX] Kretek' both become 'kretek'. Used only to compare names."""
     text = re.sub(r"^\s*[\[\(]?\s*apex\s*[\]\)]?\s*[|:\-<>/]*\s*", "", str(name or ""), flags=re.I)
@@ -1087,6 +1150,7 @@ def main():
             }
         )
     data["members"] = table
+    data["rankings"] = build_rankings(jobs, table)
     for m in members.values():
         if not lookup_net_worth(net_worth, m["name"], m["author"], manual_net_worth):
             print("No net worth for:", m["name"], "Discord ID:", m["author"],
