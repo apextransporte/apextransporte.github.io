@@ -1,5 +1,5 @@
 {
-  "member_count": 48,
+  "member_count": 49,
   "visitor_count": 15,
   "members": [
     {
@@ -244,6 +244,15 @@
       "nick": "Apex | Razael",
       "avatar": "https://cdn.discordapp.com/avatars/1364401089775927298/f28ab7f488dbc8fc95fc8da7fc634ed4.png?size=128",
       "joined": "2026-05-16T10:27:43.518000+00:00"
+    },
+    {
+      "id": "712412831773098004",
+      "name": "Apex | Robert Amon",
+      "username": "robertamon666",
+      "global_name": "Robert Amon",
+      "nick": "Apex | Robert Amon",
+      "avatar": "https://cdn.discordapp.com/avatars/712412831773098004/911cb070f5c8ada350bc1b82ee540201.png?size=128",
+      "joined": "2026-10-24T18:45:28.498000+00:00"
     },
     {
       "id": "890849381950038088",
