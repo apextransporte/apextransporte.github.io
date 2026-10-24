@@ -1,9 +1,11 @@
 import os
+import time
 import requests
 
 API = "https://discord.com/api/v10"
 RED = 0xE10600
 DEFAULT_LOGO = "https://apextransporte.github.io/logo.png"
+SHOW_SCREENSHOT = True   # set to False when the screenshot under the card looks like a second card
 
 
 def send_joblog(job):
@@ -31,15 +33,39 @@ def send_joblog(job):
         )
     embed["fields"].append({"name": "Status", "value": "✅ Accepted", "inline": False})
 
-    if job.get("image_url"):
+    if SHOW_SCREENSHOT and job.get("image_url"):
         embed["image"] = {"url": job["image_url"]}
 
-    response = requests.post(
-        f"{API}/channels/{channel_id}/messages",
-        headers={"Authorization": f"Bot {token}"},
-        json={"embeds": [embed]},
-        timeout=20,
-    )
+    body = {"embeds": [embed]}
+    if job.get("nonce"):
+        # Same nonce on every try, so Discord keeps one message even when a try times out after it posted
+        body["nonce"] = job["nonce"]
+        body["enforce_nonce"] = True
+
+    response = None
+    for attempt in range(3):
+        try:
+            response = requests.post(
+                f"{API}/channels/{channel_id}/messages",
+                headers={"Authorization": f"Bot {token}"},
+                json=body,
+                timeout=20,
+            )
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as error:
+            print("Post network problem, try", attempt + 1, "of 3:", error)
+            time.sleep(3 * (attempt + 1))
+            continue
+        if response.status_code == 429:
+            try:
+                wait = float(response.json().get("retry_after", 3))
+            except Exception:
+                wait = 3.0
+            time.sleep(min(wait, 30) + 1)
+            continue
+        break
+
+    if response is None:
+        raise RuntimeError("Discord did not answer after 3 tries")
     if not response.ok:
         print("Discord error", response.status_code, response.text)
 

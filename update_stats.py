@@ -1,4 +1,5 @@
 import bisect
+import hashlib
 import io
 import json
 import os
@@ -867,10 +868,12 @@ def post_new_jobs(jobs, plan, messages):
         if mid not in ok_ids:
             skipped["no check mark"] += 1
             continue
-        # FIX: a card is also blocked when the same driver, distance, time and income was posted before,
-        # so a screenshot read slightly differently the second time never makes a repeat card
+        # FIX: one card per Discord message. A card is blocked when the message was posted before,
+        # when the job is a repeat screenshot, or when the same driver, distance, time and income was posted before,
+        # so a screenshot read slightly differently a second time never makes a repeat card
         key = "key:{}|{}|{}|{}".format(j["author"], j["km"], j["minutes"], j["income"])
-        if j["id"] in posted_set or key in posted_set:
+        msg_key = "msg:" + mid
+        if j.get("dup") or msg_key in posted_set or j["id"] in posted_set or key in posted_set:
             skipped["already posted"] += 1
             continue
         if sent >= MAX_POSTS_PER_RUN:
@@ -888,6 +891,7 @@ def post_new_jobs(jobs, plan, messages):
             "tmp": j.get("time_penalty", 0),
             "xp": j.get("xp"),
             "image_url": urls.get(j["id"], ""),
+            "nonce": hashlib.md5(msg_key.encode()).hexdigest()[:24],   # FIX: Discord drops a second post with the same nonce
         }
         try:
             send_joblog(card)
@@ -898,8 +902,8 @@ def post_new_jobs(jobs, plan, messages):
                 print("Three posts failed, the next run tries again")
                 break
             continue
-        posted.extend([j["id"], key])
-        posted_set.update([j["id"], key])
+        posted.extend([j["id"], key, msg_key])
+        posted_set.update([j["id"], key, msg_key])
         sent += 1
         with open("posted.json", "w", encoding="utf-8") as f:   # FIX: saved after every card, so a stopped run never forgets one
             json.dump(posted, f)
