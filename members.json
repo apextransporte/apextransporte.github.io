@@ -1,6 +1,6 @@
 {
   "member_count": 48,
-  "visitor_count": 12,
+  "visitor_count": 15,
   "members": [
     {
       "id": "883723046320484362",
@@ -473,6 +473,24 @@
       "joined": "2026-08-31T09:48:31.176000+00:00"
     },
     {
+      "id": "1487867888034517125",
+      "name": "BT Yadhu",
+      "username": "yadhukrishna97",
+      "global_name": "BT Yadhu",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1487867888034517125/6858e13b63ff1432d399913e91853db7.png?size=128",
+      "joined": "2026-08-28T14:36:40.783000+00:00"
+    },
+    {
+      "id": "1411468527793209365",
+      "name": "COBRA",
+      "username": "co_bra1",
+      "global_name": "COBRA",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1411468527793209365/a7b2e592b405c8c2df0d0fa5c7420dc2.png?size=128",
+      "joined": "2026-08-10T19:12:28.864000+00:00"
+    },
+    {
       "id": "1457546936063361097",
       "name": "Don34",
       "username": "don340232",
@@ -505,7 +523,7 @@
       "username": "perth_planes",
       "global_name": "PerthB737",
       "nick": null,
-      "avatar": "https://cdn.discordapp.com/avatars/1398249893948162170/fe7c4480f9ba5c41c9c51077a3d1c97b.png?size=128",
+      "avatar": "https://cdn.discordapp.com/avatars/1398249893948162170/a_767ab3454de867dbb8bc0dc7172fc898.png?size=128",
       "joined": "2026-10-11T17:02:38.327000+00:00"
     },
     {
@@ -516,6 +534,15 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/1352883319934550032/cd35d685583c7fb3f7e487b58b94436d.png?size=128",
       "joined": "2026-07-16T12:29:25.118000+00:00"
+    },
+    {
+      "id": "1544051891682545694",
+      "name": "Scorgee🤞",
+      "username": "scorgee._31125",
+      "global_name": "Scorgee🤞",
+      "nick": null,
+      "avatar": null,
+      "joined": "2026-10-24T13:53:37.995000+00:00"
     },
     {
       "id": "923463582522437643",
