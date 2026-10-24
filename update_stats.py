@@ -25,7 +25,7 @@ from post_joblog import send_joblog
 API = "https://discord.com/api/v10"
 MAX_MESSAGES = 1500   # reads far back so older drivers get their first job found
 MAX_SECONDS = int(os.environ.get("MAX_SECONDS", "190"))   # the workflow step stops at 5 minutes, so the bot stops itself earlier and saves its progress
-SCHEMA = 4   # raised so every old screenshot is read again with the fixed rules
+SCHEMA = 5   # raised so every old screenshot is read again with the fixed rules
 MAX_SPEED = 600   # km per hour, the game allows fast average speeds
 MAX_LEVEL = 999   # the game has no level above this, anything higher is a misread
 LEVEL_DROP = 2    # a reading just below the earlier level is kept as the screenshot showed it
@@ -224,23 +224,40 @@ def to_int(text):
     return int(digits) if digits else None
 
 
+LOOKALIKE = str.maketrans("Ss$OoBZzlI|!g", "5550082211119")
+DIGITISH = "0-9Ss$OoBZzlI|!g"
+
+
 def parse_km(text):
-    m = re.search(r"(\d+)\s*[kK]", text)
-    return int(m.group(1)) if m else to_int(text)
+    """Reads 516 Km. Tesseract often reads the 5 as S or $, so those letters count as digits before the K."""
+    m = re.search(r"([" + DIGITISH + r"]+)\s*[kK]", text)
+    if m:
+        return to_int(m.group(1).translate(LOOKALIKE))
+    return to_int(text)
 
 
 def parse_time(text):
-    """Reads 2h 12m. The digit 1 is often read as i, l, | or !, so those letters count as 1 before the m."""
-    t = text.lower().strip()
-    hours = re.search(r"(\d+)\s*h", t)
-    rest = t[hours.end():] if hours else t
-    rest = rest.translate(str.maketrans("il|!", "1111"))
-    mins = re.search(r"(\d{1,2})\s*m", rest)
-    if not hours and not mins:
+    """Reads 5h 14m. Tesseract often reads the 5 as S or $ and the 1 as i, l, | or !.
+    If an h is visible but its hours digit is unreadable, the read is rejected so it is read again.
+    It never turns an unreadable hours digit into 0 hours."""
+    t = text.strip()
+    h_pos = [i for i, ch in enumerate(t) if ch in "hH"]
+    hours = None
+    rest = t
+    if h_pos:
+        h = h_pos[0]
+        m = re.search(r"([" + DIGITISH + r"]{1,2})\s*$", t[:h])
+        if not m:
+            return None
+        hours = to_int(m.group(1).translate(LOOKALIKE))
+        if hours is None:
+            return None
+        rest = t[h + 1:]
+    rest = rest.translate(str.maketrans("il|!I", "11111"))
+    mins = re.search(r"(\d{1,2})\s*m", rest.lower())
+    if not mins:
         return None
-    if hours and not mins:
-        return None  # hours with an unreadable minutes part would show a wrong time, so read it again
-    return (int(hours.group(1)) if hours else 0) * 60 + int(mins.group(1))
+    return (hours or 0) * 60 + int(mins.group(1))
 
 
 def parse_fuel(text):
@@ -355,10 +372,13 @@ def speed(km, minutes):
     return km / (minutes / 60.0) if minutes else 0
 
 
-def fix_km(km, minutes, fuel=None):
+def fix_km(km, minutes, fuel=None, income=None):
     """Remove a stray digit read next to the distance when the speed is not believable.
-    When the fuel is known, it picks the distance that also matches the fuel use."""
+    When the fuel is known, it picks the distance that also matches the fuel use.
+    If fuel and income both agree with the distance, the time is the wrong value, so the distance stays."""
     if minutes and 15 <= speed(km, minutes) <= MAX_SPEED and km <= 3000:
+        return km, False
+    if fuel and income and km <= 3000 and 0.15 <= fuel / km <= 1.2 and 4 <= income / km <= 120:
         return km, False
     s = str(km)
     cands = []
@@ -412,7 +432,7 @@ def fix_income(income, km):
 def sanitize(job):
     """Run on every saved job, so older bad reads are cleaned too. Safe to run many times."""
     raw = job.get("km_raw", job["km"])
-    km, changed = fix_km(raw, job["minutes"], job.get("fuel"))
+    km, changed = fix_km(raw, job["minutes"], job.get("fuel_raw", job.get("fuel")), job.get("income_raw", job["income"]))
     if changed:
         job["km_raw"] = raw
         job["km"] = km
