@@ -288,11 +288,49 @@ def parse_fuel(text):
 
 
 def parse_money(text):
-    m = re.search(r"\u20ac\s*(\d[\d,\.]*)", text)
-    if m:
-        return to_int(m.group(1))
-    tokens = re.findall(r"\d[\d,\.]*", text)
-    return to_int(tokens[-1]) if tokens else None
+    """FIX: reads 6,113 or 6.113 or 6 113 as 6113. Every comma, dot and space inside the number is removed.
+    Lookalike letters count as digits, and the longest digit group wins, so a split number is never cut."""
+    m = re.search(r"\u20ac\s*([" + DIGITISH + r"][" + DIGITISH + r",.\s]*)", text)
+    body = (m.group(1) if m else text).translate(LOOKALIKE)
+    groups = re.findall(r"\d[\d,.\s]*", body)
+    if not groups:
+        return None
+    best = max(groups, key=lambda g: len(re.sub(r"\D", "", g)))
+    return to_int(best)
+
+
+def income_fits(value, km):
+    """FIX: a real job pays 4 to 120 euro per km. Anything outside is a misread, never a real income."""
+    return bool(value) and bool(km) and 4 <= value / km <= 120
+
+
+def read_income(mn, box, km):
+    """FIX: only readings that match the distance count in the vote, so a cut number like 6 never wins.
+    It tries three crop sizes, so the last digits are never trimmed away, and two reading modes.
+    Returns 0 when nothing fits. The job is then read again later and its card is held."""
+    x1, y1, x2, y2 = [int(v) for v in box]
+    w, h = x2 - x1, y2 - y1
+    crops = [
+        inner(mn, box),
+        mn[y1 + int(0.06 * h): y2 - int(0.06 * h), x1 + int(0.08 * w): x2 - int(0.08 * w)],
+        mn[y1 + int(0.03 * h): y2 - int(0.03 * h), x1 + int(0.03 * w): x2 - int(0.03 * w)],
+    ]
+
+    def fits(text):
+        value = parse_money(text)
+        return value if income_fits(value, km) else None
+
+    for config in ("--psm 7", "--psm 7 -c tessedit_char_whitelist=0123456789,. "):
+        for crop in crops:
+            if crop.size == 0:
+                continue
+            value = vote(crop, fits, config=config)
+            if value:
+                return value
+    raw = [pytesseract.image_to_string(prep(crops[1], sc, mode), config="--psm 7").strip()
+           for sc, mode in VARIANTS[:4]]
+    print("Income not read for a job with", km, "km. Raw OCR text:", raw)
+    return 0
 
 
 def read_penalty(arr, box):
@@ -446,7 +484,7 @@ def fix_fuel(fuel, km):
 
 def fix_income(income, km):
     """Jobs pay roughly 4 to 120 euro per km. Repair a stray digit when the value is far outside."""
-    if not km or 4 <= income / km <= 120:
+    if not km or not income or 4 <= income / km <= 120:
         return income
     options = [(cost, abs(v / km - 18), v) for v, cost in edits(income).items() if 4 <= v / km <= 120]
     return min(options)[2] if options else income
@@ -523,23 +561,26 @@ def parse_job(image_bytes):
     layout = get_layout(mn, img.width, img.height)
     b = layout["boxes"]
 
-    # FAST: the three main fields are read side by side
+    # FAST: distance and time are read side by side
     with ThreadPoolExecutor(max_workers=OCR_WORKERS) as pool:
         f_km = pool.submit(vote, inner(mn, b["distance"]), parse_km)
         f_min = pool.submit(vote, inner(mn, b["time"]), parse_time)
-        f_inc = pool.submit(vote, inner(mn, b["income"]), parse_money)
-        km, minutes, income = f_km.result(), f_min.result(), f_inc.result()
-    print("OCR:", {"km": km, "minutes": minutes, "income": income, "layout_found": layout["found"]})
-    if km is None or minutes is None or income is None:
+        km, minutes = f_km.result(), f_min.result()
+    print("OCR:", {"km": km, "minutes": minutes, "layout_found": layout["found"]})
+    if km is None or minutes is None:
         return None
 
-    job = {"km": km, "minutes": minutes, "income": income}
-    # FAST: fuel, both penalties and the level are read side by side
+    job = {"km": km, "minutes": minutes, "income": 0}
+    # FAST: income, fuel, both penalties and the level are read side by side
+    # FIX: the income is read against the distance, so a cut number like 6 is never accepted
     with ThreadPoolExecutor(max_workers=OCR_WORKERS) as pool:
+        f_inc = pool.submit(read_income, mn, b["income"], fix_km(km, minutes)[0])
         f_fuel = pool.submit(read_fuel, mn, b["fuel"], fix_km(km, minutes)[0])
         f_dmg = pool.submit(read_penalty, arr, b["damage"])
         f_tp = pool.submit(read_penalty, arr, b["time_penalty"])
         f_lvl = pool.submit(read_level, gray, layout)
+        job["income"] = f_inc.result()
+        print("OCR income:", job["income"])
         job["fuel"] = f_fuel.result()
         job["damage"] = f_dmg.result()
         job["time_penalty"] = f_tp.result()
@@ -925,7 +966,9 @@ def post_new_jobs(jobs, plan, messages):
             for m in messages for a in m.get("attachments", [])}
     sent = 0
     failures = 0
-    skipped = {"no check mark": 0, "already posted": 0, "older than MIN_POST_ID": 0, "run limit": 0, "waiting for level": 0}
+    skipped = {"no check mark": 0, "already posted": 0, "older than MIN_POST_ID": 0, "run limit": 0, "waiting for level": 0,
+               "held, income not trusted": 0}
+    held = []
     for j in jobs:
         mid = j["id"].split("-")[0]
         if int(mid) <= MIN_POST_ID:
@@ -944,6 +987,11 @@ def post_new_jobs(jobs, plan, messages):
             continue
         if sent >= MAX_POSTS_PER_RUN:
             skipped["run limit"] += 1
+            continue
+        # FIX: a card with an income outside the believable range is never posted, it waits for a better read
+        if not income_fits(j.get("income", 0), j.get("km", 0)):
+            skipped["held, income not trusted"] += 1
+            held.append({"id": j["id"], "driver": j["name"], "km": j.get("km"), "income": j.get("income")})
             continue
         # FIX: a level copied from an older job is a guess, so the card waits until the screenshot is read again
         if j.get("level_est") and j.get("level_tries", 0) < LEVEL_RETRIES:
@@ -980,6 +1028,8 @@ def post_new_jobs(jobs, plan, messages):
         time.sleep(0.5)
     with open("posted.json", "w", encoding="utf-8") as f:
         json.dump(posted, f)
+    with open("held_cards.json", "w", encoding="utf-8") as f:   # FIX: staff see which cards wait for a correction
+        json.dump(held, f, ensure_ascii=False, indent=1)
     print("Job cards posted:", sent, "| failed:", failures, "| skipped:", skipped)
 
 
@@ -1079,7 +1129,8 @@ def main():
         j.get("reads", 0) >= MAX_READS or (
             ("fuel" in j or j.get("fuel_tries", 0) >= 3)
             and (has_real_level(j) or j.get("level_tries", 0) >= LEVEL_RETRIES)
-            and (j.get("income", 0) > 0 or j.get("income_tries", 0) >= 3)))}
+            and (j.get("income", 0) > 0 or j.get("income_tries", 0) >= 3)
+            and not j.get("check")))}   # FIX: a job with a bad income or speed is read again, up to MAX_READS
 
     def msg_done(msg):
         """FAST: true when every image of a message is already saved or given up on."""
