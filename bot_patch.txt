@@ -1,0 +1,30 @@
+STEP 1. In bot.py, replace this line:
+
+from top10_embed import build_top10_embed
+
+with this line:
+
+from daily_top10 import build_daily_embed, rows_for_day
+
+
+STEP 2. In bot.py, replace the whole post_leaderboard function and the line above it
+(from "# Posts every day at 21:00 UTC" down to the line "await channel.send(embed=embed, file=file or discord.utils.MISSING)")
+with this block:
+
+# Posts every day at 21:00 UTC, which is 00:00 East Africa Time.
+@tasks.loop(time=datetime.time(hour=21, minute=0, tzinfo=datetime.timezone.utc))
+async def post_leaderboard():
+    channel = await find_channel(LEADERBOARD_CHANNEL_ID)
+    if channel is None:
+        return
+    try:
+        await load_drivers()
+    except Exception:
+        return
+    day = (datetime.datetime.now(EAT) - datetime.timedelta(days=1)).date()
+    rows = rows_for_day(_cache.get("raw"), day)
+    if rows is None:
+        print("data.json has no daily section yet, leaderboard not posted", flush=True)
+        return
+    embed, file = build_daily_embed(rows, day)
+    await channel.send(embed=embed, file=file or discord.utils.MISSING)
