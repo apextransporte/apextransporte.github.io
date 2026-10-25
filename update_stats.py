@@ -33,7 +33,8 @@ LEVEL_SHIFT = 12  # the last two readings of a driver that agree within this man
 LEVEL_JUMP = 40   # a level this far from the driver's other levels is a misread
 MAX_READS = 3     # FIX: a saved job is read again at most this many times, so old jobs never block new ones
 OCR_WORKERS = 4   # FAST: the fields of one screenshot are read side by side
-MAX_FAILS = 2     # FIX: an image that fails this many times is skipped until SCHEMA changes
+MAX_FAILS = 2     # FIX: an image that fails this many times is skipped until SCHEMA or FAIL_VERSION changes
+FAIL_VERSION = 2  # FIX: raised when the reader is fixed, so images that failed with the old reader are tried again once
 
 # Job cards are posted to the output channel only for messages newer than this ID
 MIN_POST_ID = 1559717373542400000
@@ -98,6 +99,17 @@ def react(message, emoji, token, channel):
         print("Reaction failed", message["id"], r.status_code)
     time.sleep(0.4)
     return True
+
+
+def unreact(message, emoji, token, channel):
+    """FIX: removes the bot's own reaction, so an old red cross goes away after a job is accepted."""
+    if not already_reacted(message, emoji):
+        return
+    url = API + "/channels/" + channel + "/messages/" + message["id"] + "/reactions/" + urllib.parse.quote(emoji) + "/@me"
+    r = request_retry("DELETE", url, token)
+    if r is not None and r.status_code != 204:
+        print("Reaction removal failed", message["id"], r.status_code)
+    time.sleep(0.4)
 
 
 def fingerprint(job):
@@ -253,7 +265,8 @@ def parse_time(text):
         if hours is None:
             return None
         rest = t[h + 1:]
-    rest = rest.translate(str.maketrans("il|!I", "11111"))
+    # FIX: the minutes digits are often read as letters, so 0m comes out as Om. LOOKALIKE turns O into 0, l into 1 and S into 5.
+    rest = rest.translate(LOOKALIKE).translate(str.maketrans("i", "1"))
     mins = re.search(r"(\d{1,2})\s*m", rest.lower())
     if not mins:
         return None
@@ -961,7 +974,8 @@ def note_failure(failed, job_id, kind, why, att, msg):
     old = failed.get(job_id, {})
     failed[job_id] = {
         "v": SCHEMA,
-        "tries": old.get("tries", 0) + 1,
+        "f": FAIL_VERSION,
+        "tries": old.get("tries", 0) + 1 if old.get("f") == FAIL_VERSION else 1,
         "kind": kind,
         "why": why[:140],
         "file": att.get("filename", ""),
@@ -974,7 +988,7 @@ def note_failure(failed, job_id, kind, why, att, msg):
 
 def skip_failed(failed, job_id):
     entry = failed.get(job_id)
-    return bool(entry) and entry.get("v") == SCHEMA and entry.get("tries", 0) >= MAX_FAILS
+    return bool(entry) and entry.get("v") == SCHEMA and entry.get("f") == FAIL_VERSION and entry.get("tries", 0) >= MAX_FAILS
 
 
 def finalize_jobs(jobs):
@@ -1105,6 +1119,8 @@ def main():
         if time.time() - reaction_start > REACTION_SECONDS:
             print("Reaction time limit reached, the next run continues from here")
             break
+        if emoji == REACTION_OK:
+            unreact(msg, REACTION_NO, token, channel)   # FIX: an accepted job loses an old red cross
         if not react(msg, emoji, token, channel):
             break
         done += 1
