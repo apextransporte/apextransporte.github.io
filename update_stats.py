@@ -636,6 +636,29 @@ def build_rankings(jobs, table):
 
 
 
+DAILY_DAYS = 14   # how many days of daily totals stay in data.json
+
+
+def build_daily(jobs):
+    """Adds every job of a day (Uganda time) per driver. Repeat screenshots are already removed."""
+    cutoff = (datetime.now(TURKEY) - timedelta(days=DAILY_DAYS)).date().isoformat()
+    days = {}
+    for j in sorted(jobs, key=lambda x: x.get("ts", "")):
+        try:
+            day = datetime.fromisoformat(j["ts"]).astimezone(TURKEY).date().isoformat()
+        except Exception:
+            continue
+        if day < cutoff:
+            continue
+        row = days.setdefault(day, {}).setdefault(j["author"], {"name": j["name"], "km": 0, "jobs": 0})
+        row["name"] = j["name"]
+        row["km"] += j["km"]
+        row["jobs"] += 1
+    return {day: sorted(rows.values(), key=lambda r: r["km"], reverse=True)
+            for day, rows in sorted(days.items())}
+
+
+
 def clean_name(name):
     """'APEX | Kretek' and '[APEX] Kretek' both become 'kretek'. Used only to compare names."""
     text = re.sub(r"^\s*[\[\(]?\s*apex\s*[\]\)]?\s*[|:\-<>/]*\s*", "", str(name or ""), flags=re.I)
@@ -1176,6 +1199,7 @@ def main():
         )
     data["members"] = table
     data["rankings"] = build_rankings(jobs, table)
+    data["daily"] = build_daily(jobs)
     for m in members.values():
         if not lookup_net_worth(net_worth, m["name"], m["author"], manual_net_worth):
             print("No net worth for:", m["name"], "Discord ID:", m["author"],
