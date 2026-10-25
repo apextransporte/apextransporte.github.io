@@ -28,3 +28,28 @@ async def post_leaderboard():
         return
     embed, file = build_daily_embed(rows, day)
     await channel.send(embed=embed, file=file or discord.utils.MISSING)
+
+
+STEP 3 (sample check). In bot.py, paste this block just above the line "@bot.tree.error":
+
+@bot.tree.command(name="dailysample", description="Preview the daily leaderboard card")
+@app_commands.guild_only()
+@app_commands.default_permissions(administrator=True)
+@app_commands.describe(days_ago="0 for today, 1 for yesterday")
+async def dailysample(interaction: discord.Interaction, days_ago: int = 1):
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message("You do not have permission to use this command.", ephemeral=True)
+        return
+    await interaction.response.defer(ephemeral=True)
+    try:
+        await load_drivers()
+    except Exception:
+        await interaction.followup.send(DATA_ERROR, ephemeral=True)
+        return
+    day = (datetime.datetime.now(EAT) - datetime.timedelta(days=days_ago)).date()
+    rows = rows_for_day(_cache.get("raw"), day)
+    if rows is None:
+        await interaction.followup.send("data.json has no daily section yet. Push update_stats.py first.", ephemeral=True)
+        return
+    embed, file = build_daily_embed(rows, day)
+    await interaction.followup.send(embed=embed, file=file or discord.utils.MISSING, ephemeral=True)
