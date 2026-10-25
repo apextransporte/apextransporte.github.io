@@ -1,11 +1,25 @@
 {
- "messages_loaded": 1500,
- "newest_message": "2026-10-25T06:01:31.150000+00:00",
- "newest_saved_job": "2026-10-25T06:01:31.150000+00:00",
- "time_limit_hit": true,
- "images_waiting": 1045,
+ "messages_loaded": 200,
+ "newest_message": "2026-10-25T06:07:48.206000+00:00",
+ "newest_saved_job": "2026-10-25T06:07:48.206000+00:00",
+ "time_limit_hit": false,
+ "images_waiting": 0,
  "images_failed": 17,
  "newest_images": [
+  {
+   "posted": "2026-10-25T06:07:48.206000+00:00",
+   "status": "saved",
+   "file": "Screenshot_20261025-110643.jpg",
+   "w": 2436,
+   "h": 1080
+  },
+  {
+   "posted": "2026-10-25T06:07:39.196000+00:00",
+   "status": "saved",
+   "file": "Screenshot_20261025-102615.jpg",
+   "w": 2436,
+   "h": 1080
+  },
   {
    "posted": "2026-10-25T06:01:31.150000+00:00",
    "status": "saved",
@@ -46,20 +60,6 @@
    "status": "saved",
    "file": "Screenshot_20261024-185332.jpg",
    "w": 1650,
-   "h": 720
-  },
-  {
-   "posted": "2026-10-24T17:32:42.233000+00:00",
-   "status": "saved",
-   "file": "Screenshot_20261023_201515_Truckers_of_Europe_3.jpg",
-   "w": 2408,
-   "h": 1080
-  },
-  {
-   "posted": "2026-10-24T17:32:20.631000+00:00",
-   "status": "saved",
-   "file": "Truckers_of_Europe_3_2026-10-24-20-25-03.jpg",
-   "w": 1600,
    "h": 720
   }
  ]
