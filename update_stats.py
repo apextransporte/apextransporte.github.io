@@ -20,7 +20,7 @@ from scipy import ndimage
 import pytesseract
 
 from net_worth import estimate_net_worth, find_net_worth, fmt_money
-from post_joblog import send_joblog
+from post_joblog import send_joblog, fetch_recent_cards, card_value, edit_card_level
 
 API = "https://discord.com/api/v10"
 MAX_MESSAGES = 1500   # reads far back so older drivers get their first job found
@@ -325,7 +325,7 @@ def read_level_number(gray, box):
     c = c.resize((c.width * 6, c.height * 6), Image.BICUBIC)
     c = ImageOps.autocontrast(c)
     results = []
-    for t in (130, 150, 170):
+    for t in (110, 130, 150, 170, 190):   # FIX: more thresholds so the italic level digits are read
         b = ImageOps.invert(c.point(lambda p, t=t: 255 if p > t else 0))
         b = ImageOps.expand(b, border=30, fill=255)
         text = pytesseract.image_to_string(b, config="--psm 7 -c tessedit_char_whitelist=0123456789")
@@ -361,6 +361,16 @@ def read_level(gray, layout):
     """The bar shows the driver level (left) and the next level (right)."""
     a = read_level_number(gray, layout["level_a"])
     b = read_level_number(gray, layout["level_b"])
+    if a is None or b is None:
+        # FIX: one number is missing, so both are read again from slightly wider boxes
+        def widen(box, grow=0.25):
+            x1, y1, x2, y2 = box
+            pad_x, pad_y = (x2 - x1) * grow, (y2 - y1) * grow
+            return (x1 - pad_x, y1 - pad_y, x2 + pad_x, y2 + pad_y)
+        if a is None:
+            a = read_level_number(gray, widen(layout["level_a"]))
+        if b is None:
+            b = read_level_number(gray, widen(layout["level_b"]))
     if a is None and b is None:
         return None
     if a is None:
@@ -699,7 +709,7 @@ def lookup_net_worth(net_worth, name, author, manual):
     return value
 
 
-LEVEL_RETRIES = 3  # a job saved with no level is read again, up to this many tries in total
+LEVEL_RETRIES = 6  # a job saved with no level is read again, up to this many tries in total
 
 
 def has_real_level(j):
@@ -915,7 +925,7 @@ def post_new_jobs(jobs, plan, messages):
             for m in messages for a in m.get("attachments", [])}
     sent = 0
     failures = 0
-    skipped = {"no check mark": 0, "already posted": 0, "older than MIN_POST_ID": 0, "run limit": 0}
+    skipped = {"no check mark": 0, "already posted": 0, "older than MIN_POST_ID": 0, "run limit": 0, "waiting for level": 0}
     for j in jobs:
         mid = j["id"].split("-")[0]
         if int(mid) <= MIN_POST_ID:
@@ -934,6 +944,10 @@ def post_new_jobs(jobs, plan, messages):
             continue
         if sent >= MAX_POSTS_PER_RUN:
             skipped["run limit"] += 1
+            continue
+        # FIX: a level copied from an older job is a guess, so the card waits until the screenshot is read again
+        if j.get("level_est") and j.get("level_tries", 0) < LEVEL_RETRIES:
+            skipped["waiting for level"] += 1
             continue
         card = {
             "driver": j["name"],
@@ -1007,11 +1021,42 @@ def finalize_jobs(jobs):
     mark_duplicates(jobs)
 
 
+def fix_posted_levels(jobs):
+    """FIX: a card posted with a wrong level is edited in place once the screenshot gives the real level."""
+    if not os.environ.get("DISCORD_OUTPUT_CHANNEL_ID"):
+        return
+    try:
+        cards = fetch_recent_cards()
+    except Exception as error:
+        print("Could not check posted cards:", error)
+        return
+    real = {}
+    for j in jobs:
+        if j.get("dup") or not has_real_level(j):
+            continue
+        key = (j["name"], "{:,} km".format(j["km"]), "\u20ac{:,}".format(j["income"]),
+               "{}h {}m".format(j["minutes"] // 60, j["minutes"] % 60))
+        real[key] = j["level_now"]
+    fixed = 0
+    for m in cards:
+        key = ((m["embeds"][0].get("title") or "")[2:].strip(), card_value(m, "\U0001F6E3\uFE0F Distance"),
+               card_value(m, "\U0001F4B6 Income"), card_value(m, "\u23F1\uFE0F Time"))
+        level = real.get(key)
+        shown = card_value(m, "\U0001F3C6 Level")
+        if level and shown is not None and str(level) != str(shown).strip():
+            if edit_card_level(m, level):
+                fixed += 1
+                print("Card level corrected:", key[0], shown, "->", level)
+                time.sleep(0.5)
+    print("Card levels corrected:", fixed)
+
+
 def publish_cards(jobs, messages, nojob_ids):
     """FAST: cleans the jobs and posts the new job cards. Safe to call twice, a card is posted once."""
     finalize_jobs(jobs)
     plan = build_reaction_plan(messages, jobs, nojob_ids)
     post_new_jobs(jobs, plan, messages)
+    fix_posted_levels(jobs)
     return plan
 
 
