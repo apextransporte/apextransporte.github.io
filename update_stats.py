@@ -22,9 +22,25 @@ import pytesseract
 from net_worth import estimate_net_worth, find_net_worth, fmt_money
 from post_joblog import send_joblog, fetch_recent_cards, card_value, edit_card_level
 
+# FIX: one slow screenshot can no longer freeze the whole run.
+# Every OCR call checks this deadline. When an image takes longer than IMAGE_SECONDS,
+# it is given up, gets a red X, and the run goes on to the next image.
+IMAGE_SECONDS = int(os.environ.get("IMAGE_SECONDS", "50"))
+_deadline = {"t": None}
+_real_ocr = pytesseract.image_to_string
+
+
+def _timed_ocr(*args, **kwargs):
+    if _deadline["t"] is not None and time.time() > _deadline["t"]:
+        raise TimeoutError("image took too long to read")
+    return _real_ocr(*args, **kwargs)
+
+
+pytesseract.image_to_string = _timed_ocr
+
 API = "https://discord.com/api/v10"
 MAX_MESSAGES = 1500   # reads far back so older drivers get their first job found
-MAX_SECONDS = int(os.environ.get("MAX_SECONDS", "190"))   # the workflow step stops at 5 minutes, so the bot stops itself earlier and saves its progress
+MAX_SECONDS = int(os.environ.get("MAX_SECONDS", "170"))   # FIX: the workflow step stops at 5 minutes, so the bot stops itself earlier and saves its progress
 SCHEMA = 5   # raised so every old screenshot is read again with the fixed rules
 MAX_SPEED = 600   # km per hour, the game allows fast average speeds
 MAX_LEVEL = 999   # the game has no level above this, anything higher is a misread
@@ -554,6 +570,7 @@ def read_fuel(mn, box, km):
 
 
 def parse_job(image_bytes):
+    _deadline["t"] = time.time() + IMAGE_SECONDS   # FIX: the clock for this one image starts here
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     arr = np.asarray(img).astype(np.uint8)
     mn = arr.min(axis=2)
@@ -606,6 +623,9 @@ def fetch_messages(token, channel, is_done=None):
             print("Discord did not answer, using the", len(messages), "messages loaded so far")
             break
         print("Status:", r.status_code)
+        if r.status_code in (401, 403):   # FIX: a clear message when Discord refuses the bot
+            print("Discord refused the bot. Check the DISCORD_BOT_TOKEN secret and give the bot "
+                  "View Channel and Read Message History in the stats channel.")
         r.raise_for_status()
         batch = r.json()
         if not batch:
@@ -1175,8 +1195,11 @@ def main():
                 img_bytes = requests.get(att["url"], timeout=25).content
                 job = parse_job(img_bytes)
             except Exception as e:
-                print("Could not read", job_id, e)
-                note_failure(failed, job_id, "error", repr(e), att, msg)
+                print("Could not read", job_id, repr(e))
+                slow = isinstance(e, TimeoutError)   # FIX: a slow image gets a red X and the run goes on
+                note_failure(failed, job_id, "nojob" if slow else "error", repr(e), att, msg)
+                if slow:
+                    nojob_ids.add(msg["id"])
                 continue
             if job is None:
                 print("No numbers found in", job_id)
