@@ -1,0 +1,99 @@
+APEX ECONOMY INSTALL
+====================
+
+Two new files. Two small edits. Three secrets.
+
+PART 1. WEBSITE REPO (apextransporte/apextransporte.github.io)
+---------------------------------------------------------------
+This repo runs update_stats.py. It pays the drivers.
+
+1. Upload economy.py to the main folder, next to update_stats.py.
+
+2. In update_stats.py find this line near the top:
+
+   from post_joblog import send_joblog, fetch_recent_cards, card_value, edit_card_level
+
+   Add this line right under it:
+
+   import economy
+
+3. In update_stats.py find the function publish_cards. It looks like this:
+
+   def publish_cards(jobs, messages, nojob_ids):
+       finalize_jobs(jobs)
+       plan = build_reaction_plan(messages, jobs, nojob_ids)
+       post_new_jobs(jobs, plan, messages)
+       fix_posted_levels(jobs)
+       return plan
+
+   Add one line after post_new_jobs, so it becomes:
+
+   def publish_cards(jobs, messages, nojob_ids):
+       finalize_jobs(jobs)
+       plan = build_reaction_plan(messages, jobs, nojob_ids)
+       post_new_jobs(jobs, plan, messages)
+       economy.pay_new_jobs(jobs, plan)
+       fix_posted_levels(jobs)
+       return plan
+
+4. On GitHub open Settings, then Secrets and variables, then Actions.
+   Add two repository secrets:
+   UNB_TOKEN        your UnbelievaBoat token
+   UNB_GUILD_ID     your Apex server ID
+
+5. Open .github/workflows/update-stats.yml. Find the env block of the step that
+   runs update_stats.py. Add these two lines next to DISCORD_BOT_TOKEN:
+
+   UNB_TOKEN: ${{ secrets.UNB_TOKEN }}
+   UNB_GUILD_ID: ${{ secrets.UNB_GUILD_ID }}
+
+   Keep the same spacing as the lines around them.
+
+6. Pay starts for jobs posted after PAY_FROM in economy.py.
+   The default is 28 Oct 2026 00:00 East Africa Time.
+   Old jobs are never paid. Change the date if you want an earlier start.
+
+
+PART 2. BOT REPO (apextransporte/apex-bot)
+------------------------------------------
+This repo runs bot.py on Render. It adds /wallet and /richest.
+
+1. Upload wallet.py to the main folder, next to bot.py.
+
+2. In bot.py find this line near the top:
+
+   from daily_top10 import build_daily_embed, rows_for_day
+
+   Add this line right under it:
+
+   from wallet import add_wallet
+
+3. In bot.py find this line:
+
+   bot = ApexBot()
+
+   Add this line right under it:
+
+   add_wallet(bot)
+
+4. Render Environment needs UNB_TOKEN. You added it already.
+
+5. Render redeploys after the upload. The new commands show up in a minute.
+
+
+FUN RULES (change them at the top of economy.py)
+------------------------------------------------
+Pay            1 coin per euro of job income, paid into the bank
+Rank raise     Pro +5% from 10,000 km, Legend +10% from 50,000 km
+Daily streak   3 days in a row +5%, 7 days in a row +15%
+Long haul      500 km or more +10%
+Lucky job      5% chance that the whole pay doubles
+Driver of week every Monday the top distance driver wins 5,000 coins
+
+
+FIRST TEST
+----------
+1. Post one real job screenshot in the joblog channel after PAY_FROM.
+2. Wait for the job card. A pay slip follows in the same channel.
+3. Type /wallet in Discord. The coins should show.
+4. If no pay slip shows, open the Actions run log and search for the word Economy.
