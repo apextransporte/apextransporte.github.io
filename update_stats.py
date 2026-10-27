@@ -73,6 +73,12 @@ REACTION_OK = "\u2705"
 REACTION_NO = "\u274c"
 REACTION_SECONDS = 30
 
+# Repeated job log screenshots are deleted from the channel. Only messages posted after DELETE_FROM are touched,
+# so old history is never removed. The bot needs the Manage Messages permission in the joblog channel.
+DELETE_REPEATS = True
+DELETE_FROM = datetime.fromisoformat("2026-10-27T14:30:00+03:00")
+MAX_DELETES_PER_RUN = 10
+
 
 def request_retry(method, url, token, tries=4):
     """Calls Discord and tries again after a timeout, a network error, or a rate limit."""
@@ -126,6 +132,35 @@ def unreact(message, emoji, token, channel):
     if r is not None and r.status_code != 204:
         print("Reaction removal failed", message["id"], r.status_code)
     time.sleep(0.4)
+
+
+def delete_message(message, token, channel):
+    """Deletes one message. Returns False when the bot lacks Manage Messages, so the caller stops deleting."""
+    url = API + "/channels/" + channel + "/messages/" + message["id"]
+    r = request_retry("DELETE", url, token)
+    if r is None:
+        print("Delete skipped, Discord did not answer", message["id"])
+        return True
+    if r.status_code == 403:
+        print("Delete blocked, give the bot Manage Messages in the joblog channel")
+        return False
+    if r.status_code not in (204, 404):
+        print("Delete failed", message["id"], r.status_code)
+    else:
+        print("Repeated job log deleted", message["id"])
+    time.sleep(0.4)
+    return True
+
+
+def is_repeat_message(msg, dup_job_ids):
+    """True when every image of the message is a repeat and the message is newer than DELETE_FROM."""
+    ids = [msg["id"] + "-" + str(a.get("id")) for a in msg.get("attachments", []) if is_image(a)]
+    if not ids or not all(i in dup_job_ids for i in ids):
+        return False
+    try:
+        return datetime.fromisoformat(msg.get("timestamp", "")) > DELETE_FROM
+    except ValueError:
+        return False
 
 
 def fingerprint(job):
@@ -1262,10 +1297,20 @@ def main():
     # Reactions: check mark for new job logs, X for repeats and for images with no job log
     reaction_start = time.time()
     done = 0
+    dup_job_ids = {j["id"] for j in jobs if j.get("dup")}
+    deleted = 0
+    deleting = DELETE_REPEATS
     for msg, emoji in plan:
         if time.time() - reaction_start > REACTION_SECONDS:
             print("Reaction time limit reached, the next run continues from here")
             break
+        # A repeated screenshot is removed. If Discord refuses, it keeps the red X instead.
+        if (emoji == REACTION_NO and deleting and deleted < MAX_DELETES_PER_RUN
+                and is_repeat_message(msg, dup_job_ids)):
+            if delete_message(msg, token, channel):
+                deleted += 1
+                continue
+            deleting = False
         if emoji == REACTION_OK:
             unreact(msg, REACTION_NO, token, channel)   # FIX: an accepted job loses an old red cross
         if not react(msg, emoji, token, channel):
