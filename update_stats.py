@@ -750,6 +750,34 @@ def clean_name(name):
     return re.sub(r"[^a-z0-9]", "", text.lower())
 
 
+# Drivers who start with a fixed net worth. The amount counts from the "since" time.
+# Every job income posted after that time is added to it automatically.
+START_NET_WORTH = {
+    "yusuf": {"amount": 16222, "since": "2026-10-27T14:27:00+03:00"},
+}
+
+
+def apply_start_net_worth(net_worth, jobs):
+    """Sets the net worth of each driver in START_NET_WORTH to the start amount
+    plus the income of every job posted after the start time."""
+    for key, rule in START_NET_WORTH.items():
+        since = datetime.fromisoformat(rule["since"])
+        total = rule["amount"]
+        names = set()
+        for j in jobs:
+            if clean_name(j["name"]) != key:
+                continue
+            names.add(j["name"])
+            try:
+                when = datetime.fromisoformat(j.get("ts", ""))
+            except ValueError:
+                continue
+            if when > since:
+                total += j["income"]
+        for name in names:
+            net_worth[name] = total
+
+
 def lookup_net_worth(net_worth, name, author, manual):
     """Order: value typed in net_worth_manual.json (by Discord ID or name), then the saved base
     values by exact name, then by cleaned name. A driver is never left blank only because of a tag."""
@@ -1283,6 +1311,9 @@ def main():
     data["networth"] = fmt_money(sum(net_worth.values()))
     with open("net_worth.json", "w", encoding="utf-8") as f:
         json.dump({k: round(v) for k, v in net_worth.items()}, f, ensure_ascii=False)
+    # Start values (for example Yusuf) are applied after the save above, so net_worth.json stays clean
+    apply_start_net_worth(net_worth, jobs)
+    data["networth"] = fmt_money(sum(net_worth.values()))
 
     members = {}
     for j in jobs:
