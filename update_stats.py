@@ -21,6 +21,7 @@ import pytesseract
 
 from net_worth import estimate_net_worth, find_net_worth, fmt_money
 from post_joblog import send_joblog, fetch_recent_cards, card_value, edit_card_level
+import economy
 
 # FIX: one slow screenshot can no longer freeze the whole run.
 # Every OCR call checks this deadline. When an image takes longer than IMAGE_SECONDS,
@@ -1189,6 +1190,7 @@ def publish_cards(jobs, messages, nojob_ids):
     finalize_jobs(jobs)
     plan = build_reaction_plan(messages, jobs, nojob_ids)
     post_new_jobs(jobs, plan, messages)
+    economy.pay_new_jobs(jobs, plan)
     fix_posted_levels(jobs)
     return plan
 
