@@ -123,7 +123,8 @@ def balance_total(data):
 # ---------- Discord pay slips ----------
 
 def announce(embed):
-    channel = os.environ.get("DISCORD_OUTPUT_CHANNEL_ID")
+    # Pay slips go to the economy channel. The job card channel is the backup when it is not set.
+    channel = os.environ.get("ECONOMY_CHANNEL_ID") or os.environ.get("DISCORD_OUTPUT_CHANNEL_ID")
     token = os.environ.get("DISCORD_BOT_TOKEN")
     if not channel or not token:
         return
@@ -139,7 +140,9 @@ def announce(embed):
         if r.status_code == 429:
             time.sleep(5)
             continue
-        if r.status_code not in (200, 201):
+        if r.status_code == 403:
+            print("Economy: pay slip blocked, give the bot View Channel, Send Messages and Embed Links in the economy channel")
+        elif r.status_code not in (200, 201):
             print("Economy: pay slip failed", r.status_code)
         return
 
