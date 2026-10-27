@@ -814,6 +814,25 @@ def apply_start_net_worth(net_worth, jobs):
             net_worth[name] = total
 
 
+# Fixed amounts added on top of a driver's net worth on every run.
+# The base net worth is rebuilt from scratch each run, so an amount never counts twice.
+# Each person has a list of cleaned names (Apex tag removed, lower case). The first match is used.
+NET_WORTH_ADDITIONS = {
+    "ana": {"amount": 669823, "names": ["ana", "anas"]},
+    "norman": {"amount": 545473, "names": ["norman"]},
+}
+
+
+def apply_net_worth_additions(net_worth):
+    """Adds each fixed amount once to the matching driver in net_worth."""
+    for label, rule in NET_WORTH_ADDITIONS.items():
+        wanted = set(rule["names"])
+        for name in list(net_worth):
+            if clean_name(name) in wanted:
+                net_worth[name] += rule["amount"]
+                print("Net worth addition:", name, "+", rule["amount"])
+
+
 def lookup_net_worth(net_worth, name, author, manual):
     """Order: value typed in net_worth_manual.json (by Discord ID or name), then the saved base
     values by exact name, then by cleaned name. A driver is never left blank only because of a tag."""
@@ -1358,8 +1377,10 @@ def main():
     data["networth"] = fmt_money(sum(net_worth.values()))
     with open("net_worth.json", "w", encoding="utf-8") as f:
         json.dump({k: round(v) for k, v in net_worth.items()}, f, ensure_ascii=False)
-    # Start values (for example Yusuf) are applied after the save above, so net_worth.json stays clean
+    # Start values (for example Yusuf) and fixed additions (Ana, Norman) are applied after the save above,
+    # so net_worth.json stays clean and an addition never counts twice
     apply_start_net_worth(net_worth, jobs)
+    apply_net_worth_additions(net_worth)
     data["networth"] = fmt_money(sum(net_worth.values()))
 
     members = {}
