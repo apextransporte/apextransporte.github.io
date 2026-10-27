@@ -38,6 +38,9 @@ jobs:
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           DISCORD_STATS_CHANNEL_ID: ${{ secrets.DISCORD_STATS_CHANNEL_ID }}
           DISCORD_OUTPUT_CHANNEL_ID: ${{ secrets.DISCORD_OUTPUT_CHANNEL_ID }}
+          UNB_TOKEN: ${{ secrets.UNB_TOKEN }}
+          UNB_GUILD_ID: ${{ secrets.UNB_GUILD_ID }}
+          ECONOMY_CHANNEL_ID: ${{ secrets.ECONOMY_CHANNEL_ID }}
         run: python update_stats.py
 
       - name: Build staff.json
