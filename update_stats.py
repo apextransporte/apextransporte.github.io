@@ -786,6 +786,13 @@ def clean_name(name):
     return re.sub(r"[^a-z0-9]", "", text.lower())
 
 
+def name_matches(name, wanted):
+    """True when the cleaned name equals a wanted name, or starts with one of 4 or more letters.
+    So 'Apex | Anas', 'Anas TR' and 'Anas \U0001F1F9\U0001F1F7' all match 'anas'."""
+    cleaned = clean_name(name)
+    return any(cleaned == w or (len(w) >= 4 and cleaned.startswith(w)) for w in wanted)
+
+
 # Drivers who start with a fixed net worth. The amount counts from the "since" time.
 # Every job income posted after that time is added to it automatically.
 START_NET_WORTH = {
@@ -801,7 +808,7 @@ def apply_start_net_worth(net_worth, jobs):
         total = rule["amount"]
         names = set()
         for j in jobs:
-            if clean_name(j["name"]) != key:
+            if not name_matches(j["name"], [key]):
                 continue
             names.add(j["name"])
             try:
@@ -818,19 +825,41 @@ def apply_start_net_worth(net_worth, jobs):
 # The base net worth is rebuilt from scratch each run, so an amount never counts twice.
 # Each person has a list of cleaned names (Apex tag removed, lower case). The first match is used.
 NET_WORTH_ADDITIONS = {
-    "ana": {"amount": 669823, "names": ["ana", "anas"]},
-    "norman": {"amount": 545473, "names": ["norman"]},
+    "ana": {"amount": 669823, "names": ["ana", "anas"], "since": "2026-10-28T06:33:00+03:00"},
+    "norman": {"amount": 545473, "names": ["norman"], "since": "2026-10-28T06:33:00+03:00"},
 }
 
 
-def apply_net_worth_additions(net_worth):
-    """Adds each fixed amount once to the matching driver in net_worth."""
+def apply_net_worth_additions(net_worth, jobs):
+    """Adds each fixed amount once to the matching driver in net_worth.
+    A driver with no saved net worth starts from the amount and grows with every job posted after the since time."""
     for label, rule in NET_WORTH_ADDITIONS.items():
         wanted = set(rule["names"])
-        for name in list(net_worth):
-            if clean_name(name) in wanted:
-                net_worth[name] += rule["amount"]
-                print("Net worth addition:", name, "+", rule["amount"])
+        found = [name for name in list(net_worth) if name_matches(name, wanted)]
+        for name in found:
+            net_worth[name] += rule["amount"]
+            print("Net worth addition:", name, "+", rule["amount"])
+        if found:
+            continue
+        since = datetime.fromisoformat(rule["since"])
+        total = rule["amount"]
+        names = set()
+        for j in jobs:
+            if not name_matches(j["name"], wanted):
+                continue
+            names.add(j["name"])
+            try:
+                when = datetime.fromisoformat(j.get("ts", ""))
+            except ValueError:
+                continue
+            if when > since:
+                total += j["income"]
+        for name in names:
+            net_worth[name] = total
+            print("Net worth start value:", name, "=", total)
+        if not names:
+            seen = sorted({j["name"] for j in jobs})
+            print("Net worth rule found no driver for", sorted(wanted), "| driver names seen:", seen)
 
 
 def lookup_net_worth(net_worth, name, author, manual):
@@ -1380,7 +1409,7 @@ def main():
     # Start values (for example Yusuf) and fixed additions (Ana, Norman) are applied after the save above,
     # so net_worth.json stays clean and an addition never counts twice
     apply_start_net_worth(net_worth, jobs)
-    apply_net_worth_additions(net_worth)
+    apply_net_worth_additions(net_worth, jobs)
     data["networth"] = fmt_money(sum(net_worth.values()))
 
     members = {}
