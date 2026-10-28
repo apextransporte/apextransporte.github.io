@@ -1,11 +1,18 @@
 {
- "messages_loaded": 100,
- "newest_message": "2026-10-27T23:56:56.624000+00:00",
- "newest_saved_job": "2026-10-27T23:56:50.580000+00:00",
+ "messages_loaded": 400,
+ "newest_message": "2026-10-28T04:41:19.557000+00:00",
+ "newest_saved_job": "2026-10-28T04:41:11.317000+00:00",
  "time_limit_hit": false,
  "images_waiting": 0,
  "images_failed": 10,
  "newest_images": [
+  {
+   "posted": "2026-10-28T04:41:11.317000+00:00",
+   "status": "saved",
+   "file": "Truckers_of_Europe_3_2026-10-28-07-38-27.jpg",
+   "w": 1600,
+   "h": 720
+  },
   {
    "posted": "2026-10-27T23:56:50.580000+00:00",
    "status": "saved",
@@ -53,13 +60,6 @@
    "status": "saved",
    "file": "game_Screenshot_20261027-174617.jpg",
    "w": 2400,
-   "h": 1080
-  },
-  {
-   "posted": "2026-10-27T18:13:56.464000+00:00",
-   "status": "saved",
-   "file": "Screenshot_20261027-231043.jpg",
-   "w": 2436,
    "h": 1080
   }
  ]
