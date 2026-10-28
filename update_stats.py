@@ -826,7 +826,7 @@ def apply_start_net_worth(net_worth, jobs):
 # Each person has a list of cleaned names (Apex tag removed, lower case). The first match is used.
 NET_WORTH_ADDITIONS = {
     "ana": {"amount": 669823, "names": ["ana", "anas"], "since": "2026-10-28T06:33:00+03:00"},
-    "norman": {"amount": 545473, "names": ["norman"], "since": "2026-10-28T06:33:00+03:00"},
+    "noman": {"amount": 545473, "names": ["noman", "norman"], "since": "2026-10-28T06:33:00+03:00"},
 }
 
 
