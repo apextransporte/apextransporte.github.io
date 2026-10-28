@@ -5,6 +5,7 @@ import json
 import os
 import re
 import time
+import unicodedata
 import urllib.parse
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
@@ -788,8 +789,10 @@ def clean_name(name):
 
 def name_matches(name, wanted):
     """True when the cleaned name equals a wanted name, or starts with one of 4 or more letters.
-    So 'Apex | Anas', 'Anas TR' and 'Anas \U0001F1F9\U0001F1F7' all match 'anas'."""
-    cleaned = clean_name(name)
+    Fancy letters are turned into plain ones first, so a name written with bold letters and a TM sign
+    still matches 'anas'. 'Apex | Anas', 'Anas TR' and the same name with skulls all match."""
+    text = unicodedata.normalize("NFKC", str(name or "").replace("\u2122", ""))
+    cleaned = clean_name(text)
     return any(cleaned == w or (len(w) >= 4 and cleaned.startswith(w)) for w in wanted)
 
 
@@ -832,7 +835,10 @@ NET_WORTH_ADDITIONS = {
 
 def apply_net_worth_additions(net_worth, jobs):
     """Adds each fixed amount once to the matching driver in net_worth.
-    A driver with no saved net worth starts from the amount and grows with every job posted after the since time."""
+    A driver with no saved net worth starts from the amount and grows with every job posted after the since time.
+    One person with two Discord accounts shows the same value on both cards.
+    Returns the amount counted twice, so the company total can remove it."""
+    extra = 0
     for label, rule in NET_WORTH_ADDITIONS.items():
         wanted = set(rule["names"])
         found = [name for name in list(net_worth) if name_matches(name, wanted)]
@@ -857,9 +863,34 @@ def apply_net_worth_additions(net_worth, jobs):
         for name in names:
             net_worth[name] = total
             print("Net worth start value:", name, "=", total)
+        if len(names) > 1:
+            extra += total * (len(names) - 1)
         if not names:
             seen = sorted({j["name"] for j in jobs})
             print("Net worth rule found no driver for", sorted(wanted), "| driver names seen:", seen)
+    return extra
+
+
+# People who use two Discord accounts. All their jobs are shown under the account that posted last,
+# so the stats, cards and rankings show one driver. Each label is a key of NET_WORTH_ADDITIONS.
+MERGE_ACCOUNTS = ["ana"]
+
+
+def merge_accounts(jobs):
+    """Returns the jobs with every account of a merged person turned into the newest account.
+    The saved jobs are not changed, only the copies used for the stats."""
+    out = list(jobs)
+    for label in MERGE_ACCOUNTS:
+        wanted = set(NET_WORTH_ADDITIONS[label]["names"])
+        mine = [i for i, j in enumerate(out) if name_matches(j["name"], wanted)]
+        if len({out[i]["author"] for i in mine}) < 2:
+            continue
+        newest = max((out[i] for i in mine), key=lambda j: j.get("ts", ""))
+        for i in mine:
+            if out[i]["author"] != newest["author"]:
+                out[i] = dict(out[i], author=newest["author"], name=newest["name"])
+        print("Accounts merged for", label, "into", newest["name"])
+    return out
 
 
 def lookup_net_worth(net_worth, name, author, manual):
@@ -1370,7 +1401,7 @@ def main():
 
     # Repeated screenshots stay in jobs.json but never count in any total
     saved_jobs = jobs
-    jobs = [j for j in saved_jobs if not j.get("dup")]
+    jobs = merge_accounts([j for j in saved_jobs if not j.get("dup")])
 
     data = load_json("data.json", {})
     for key in ["networth", "drivers", "hours", "distance", "runs", "income", "latest_job"]:
@@ -1409,8 +1440,8 @@ def main():
     # Start values (for example Yusuf) and fixed additions (Ana, Norman) are applied after the save above,
     # so net_worth.json stays clean and an addition never counts twice
     apply_start_net_worth(net_worth, jobs)
-    apply_net_worth_additions(net_worth, jobs)
-    data["networth"] = fmt_money(sum(net_worth.values()))
+    extra_counted = apply_net_worth_additions(net_worth, jobs)
+    data["networth"] = fmt_money(sum(net_worth.values()) - extra_counted)
 
     members = {}
     for j in jobs:
