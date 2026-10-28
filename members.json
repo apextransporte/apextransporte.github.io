@@ -1,6 +1,6 @@
 {
-  "member_count": 46,
-  "visitor_count": 14,
+  "member_count": 47,
+  "visitor_count": 15,
   "members": [
     {
       "id": "883723046320484362",
@@ -28,6 +28,15 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/1519302231453863945/585717852aa5d16d93dc235ee68072d8.png?size=128",
       "joined": "2026-09-08T08:45:54.706000+00:00"
+    },
+    {
+      "id": "1543170421720088644",
+      "name": "Apex Caristo Muchindu",
+      "username": "apexcaristo",
+      "global_name": "Apex Caristo Muchindu",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1543170421720088644/1dbc65258332a7d5663bdf1121595c45.png?size=128",
+      "joined": "2026-10-22T18:32:03.690000+00:00"
     },
     {
       "id": "1261427383425044522",
@@ -489,6 +498,15 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/1457546936063361097/5445ffd7ffb201a98393cbdf684ea4b1.png?size=128",
       "joined": "2026-01-05T02:06:00.348000+00:00"
+    },
+    {
+      "id": "1147476049769267321",
+      "name": "Mr. ZarvexA",
+      "username": "zarvexa",
+      "global_name": "Mr. ZarvexA",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1147476049769267321/a_c998538e54ce68548abf50d904358642.png?size=128",
+      "joined": "2026-10-28T13:59:39.372000+00:00"
     },
     {
       "id": "1276846780016758835",
