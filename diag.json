@@ -1,11 +1,18 @@
 {
  "messages_loaded": 200,
- "newest_message": "2026-10-28T19:49:25.483000+00:00",
- "newest_saved_job": "2026-10-28T19:49:25.483000+00:00",
+ "newest_message": "2026-10-28T20:16:30.545000+00:00",
+ "newest_saved_job": "2026-10-28T20:16:30.545000+00:00",
  "time_limit_hit": false,
  "images_waiting": 0,
  "images_failed": 10,
  "newest_images": [
+  {
+   "posted": "2026-10-28T20:16:30.545000+00:00",
+   "status": "saved",
+   "file": "Screenshot_20261028-200917.png",
+   "w": 1612,
+   "h": 720
+  },
   {
    "posted": "2026-10-28T19:49:25.483000+00:00",
    "status": "saved",
@@ -54,13 +61,6 @@
    "file": "IMG_5062.png",
    "w": 2622,
    "h": 1206
-  },
-  {
-   "posted": "2026-10-28T16:59:44.733000+00:00",
-   "status": "saved",
-   "file": "Truckers_of_Europe_3_2026-10-28-19-57-48.jpg",
-   "w": 1600,
-   "h": 720
   }
  ]
 }
