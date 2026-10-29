@@ -511,7 +511,7 @@ const APEX_FEED_URL = "";
     put(row, "Fuel", m.last_fuel);
     put(row, "Income", m.last_income);
     put(row, "Level", levelOf(m));
-    fill(row, "Net worth", m.networth);
+    if (m.networth && m.networth !== "$0") { put(row, "Net worth", m.networth); row.setAttribute("data-nw", "bot"); }
   }
   function setStat(key, val) {
     var el = document.querySelector('[data-stat="' + key + '"] b');
@@ -546,7 +546,7 @@ const APEX_FEED_URL = "";
     return Math.round(n).toLocaleString("en-US") + " km";
   }
   function loadNetWorth() {
-    var FIXED = { "ANAS": 127500, "Apex|Baku": 23156, "Apex | kretek": 110714 };
+    var FIXED = { "Apex|Baku": 23156, "Apex | kretek": 110714 };
     return fetch("net_worth.json?v=" + Date.now(), { cache: "no-store" })
       .then(function (r) { return r.json(); })
       .catch(function () { return {}; })
@@ -562,10 +562,10 @@ const APEX_FEED_URL = "";
         if (table) {
           [].slice.call(table.querySelectorAll(".jr:not(.hd)")).forEach(function (row) {
             var v = byName[norm2(row.querySelector("b").textContent)];
-            if (v != null) put(row, "Net worth", money(v));
+            if (v != null && row.getAttribute("data-nw") !== "bot") put(row, "Net worth", money(v));
           });
         }
-        setStat("netWorth", money(total));
+        if (!window.__botTotal) setStat("netWorth", money(total));
       })
       .catch(function () { /* net_worth.json missing: the saved values stay as they are */ });
   }
@@ -607,6 +607,7 @@ const APEX_FEED_URL = "";
       setStat("totalDistanceKm", d.distance);
       setStat("drivingTimeMinutes", d.hours);
       setStat("totalRuns", d.runs);
+      if (d.networth) { window.__botTotal = true; setStat("netWorth", d.networth); }
       var table = document.getElementById("jobsTable");
       if (!table) return;
       var members = Array.isArray(d.members) ? d.members : [];
