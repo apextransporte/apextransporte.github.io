@@ -896,6 +896,13 @@ def merge_accounts(jobs):
     return out
 
 
+def full_money(value):
+    """Shows the whole figure, for example $739,200, never $739.2k. An empty or zero value keeps the old look."""
+    if not value:
+        return fmt_money(value)
+    return "${:,}".format(int(round(value)))
+
+
 def auto_net_worth(net_worth, name):
     """The automatic value of a driver who has a start rule (Yusuf) or a fixed addition (Anas, Noman).
     It grows with every new job income, so it always wins over a typed value."""
@@ -1453,14 +1460,14 @@ def main():
     net_worth = estimate_net_worth(job_rows)
     manual_net_worth = load_json("net_worth_manual.json", {})
     manual_levels = load_json("levels_manual.json", {})
-    data["networth"] = fmt_money(sum(net_worth.values()))
+    data["networth"] = full_money(sum(net_worth.values()))
     with open("net_worth.json", "w", encoding="utf-8") as f:
         json.dump({k: round(v) for k, v in net_worth.items()}, f, ensure_ascii=False)
     # Start values (for example Yusuf) and fixed additions (Ana, Norman) are applied after the save above,
     # so net_worth.json stays clean and an addition never counts twice
     apply_start_net_worth(net_worth, jobs)
     extra_counted = apply_net_worth_additions(net_worth, jobs)
-    data["networth"] = fmt_money(sum(net_worth.values()) - extra_counted)
+    data["networth"] = full_money(sum(net_worth.values()) - extra_counted)
 
     members = {}
     for j in jobs:
@@ -1497,7 +1504,7 @@ def main():
                 "fuel": ("~" if m["fuel_est"] else "") + "{:,} l".format(m["fuel"]) if m["read"] else "",
                 "damage": "\u20ac{:,}".format(m["damage"]) if m["pen_read"] else "",
                 "time_penalty": "\u20ac{:,}".format(m["time_penalty"]) if m["pen_read"] else "",
-                "networth": fmt_money(lookup_net_worth(net_worth, m["name"], m["author"], manual_net_worth)),
+                "networth": full_money(lookup_net_worth(net_worth, m["name"], m["author"], manual_net_worth)),
                 "last_km": "{} km".format(last["km"]),
                 "last_time": fmt_time(last["minutes"]),
                 "last_income": "\u20ac{:,}".format(last["income"]),
