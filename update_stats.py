@@ -896,9 +896,25 @@ def merge_accounts(jobs):
     return out
 
 
+def auto_net_worth(net_worth, name):
+    """The automatic value of a driver who has a start rule (Yusuf) or a fixed addition (Anas, Noman).
+    It grows with every new job income, so it always wins over a typed value."""
+    for key in START_NET_WORTH:
+        if name in net_worth and name_matches(name, [key]):
+            return net_worth[name]
+    for rule in NET_WORTH_ADDITIONS.values():
+        if name in net_worth and name_matches(name, set(rule["names"])):
+            return net_worth[name]
+    return None
+
+
 def lookup_net_worth(net_worth, name, author, manual):
-    """Order: value typed in net_worth_manual.json (by Discord ID or name), then the saved base
-    values by exact name, then by cleaned name. A driver is never left blank only because of a tag."""
+    """Order: the automatic value of a ruled driver, then a value typed in net_worth_manual.json
+    (by Discord ID or name), then the saved base values by exact name, then by cleaned name.
+    A driver is never left blank only because of a tag."""
+    auto = auto_net_worth(net_worth, name)
+    if auto:
+        return auto
     for key in (str(author), name):
         if key in manual:
             return manual[key]
