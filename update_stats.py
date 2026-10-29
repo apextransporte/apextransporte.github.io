@@ -166,8 +166,11 @@ def is_repeat_message(msg, dup_job_ids):
 
 
 def fingerprint(job):
-    return (job["author"], job["km"], job["minutes"], job["income"],
-            job.get("fuel", 0), job.get("damage", 0), job.get("time_penalty", 0))
+    # FIX: same driver, distance, time and income is the same job. Fuel and penalties are left out,
+    # because a second screenshot of one job can be read with a small difference there, and the job
+    # would then count twice, get paid twice and still have its card blocked by post_new_jobs.
+    # This is the same key post_new_jobs uses, so every check now agrees.
+    return (job["author"], job["km"], job["minutes"], job["income"])
 
 
 def build_reaction_plan(messages, jobs, nojob_ids):
