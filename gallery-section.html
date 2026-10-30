@@ -1,0 +1,141 @@
+<!-- ===== APEX GALLERY: paste where your old gallery section was ===== -->
+<section id="gallery" class="ax-gallery">
+  <div class="ax-g-head">
+    <p class="ax-g-kicker">Gallery</p>
+    <h2>On the road with Apex</h2>
+    <p class="ax-g-sub">Real screenshots from our drivers in Truckers of Europe 3.</p>
+    <div class="ax-g-filters" id="axFilters" role="tablist"></div>
+  </div>
+  <div class="ax-g-grid" id="axGrid"></div>
+  <p class="ax-g-count" id="axCount"></p>
+  <div class="ax-g-cta">
+    <p>Got a great shot of your Apex truck? Post it in our Discord.</p>
+    <a class="ax-g-btn" href="https://discord.gg/WquCCGx4RX" target="_blank" rel="noopener">Share yours on Discord</a>
+  </div>
+</section>
+
+<div class="ax-lb" id="axLb" hidden aria-modal="true" role="dialog">
+  <button class="ax-lb-x" id="axClose" aria-label="Close">&times;</button>
+  <button class="ax-lb-n ax-prev" id="axPrev" aria-label="Previous">&#8249;</button>
+  <figure>
+    <img id="axImg" alt="">
+    <figcaption id="axCap"></figcaption>
+  </figure>
+  <button class="ax-lb-n ax-next" id="axNext" aria-label="Next">&#8250;</button>
+</div>
+
+<style>
+.ax-gallery{--ax-red:#e11d2e;--ax-bg:#0b0b0d;--ax-card:#141417;--ax-line:#2a2a30;--ax-text:#f2f2f2;--ax-mute:#9a9aa3;
+  background:var(--ax-bg);color:var(--ax-text);padding:72px 20px;font-family:inherit}
+.ax-g-head{max-width:1200px;margin:0 auto 32px;text-align:center}
+.ax-g-kicker{color:var(--ax-red);letter-spacing:.2em;text-transform:uppercase;font-size:.8rem;font-weight:700;margin:0 0 8px}
+.ax-gallery h2{font-size:clamp(1.8rem,4vw,2.6rem);margin:0 0 8px}
+.ax-g-sub{color:var(--ax-mute);margin:0 0 24px}
+.ax-g-filters{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.ax-g-filters button{background:var(--ax-card);color:var(--ax-text);border:1px solid var(--ax-line);padding:8px 16px;border-radius:999px;cursor:pointer;font:inherit;font-size:.9rem;transition:.2s}
+.ax-g-filters button:hover{border-color:var(--ax-red)}
+.ax-g-filters button.on{background:var(--ax-red);border-color:var(--ax-red);color:#fff}
+.ax-g-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;grid-auto-flow:dense}
+.ax-g-item{position:relative;overflow:hidden;border-radius:12px;background:var(--ax-card);border:1px solid var(--ax-line);cursor:pointer;aspect-ratio:16/9;padding:0;display:block;width:100%;animation:axIn .4s ease both}
+.ax-g-item.wide{grid-column:span 2}
+.ax-g-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s}
+.ax-g-item:hover img,.ax-g-item:focus-visible img{transform:scale(1.06)}
+.ax-g-item:focus-visible{outline:2px solid var(--ax-red);outline-offset:2px}
+.ax-g-item::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85),transparent 55%);opacity:.0;transition:.3s}
+.ax-g-item:hover::after,.ax-g-item:focus-visible::after{opacity:1}
+.ax-g-cap{position:absolute;left:14px;right:14px;bottom:12px;z-index:2;text-align:left;font-size:.9rem;font-weight:600;opacity:0;transform:translateY(8px);transition:.3s}
+.ax-g-item:hover .ax-g-cap,.ax-g-item:focus-visible .ax-g-cap{opacity:1;transform:none}
+.ax-g-tag{position:absolute;top:10px;left:10px;z-index:2;background:rgba(0,0,0,.7);border-left:3px solid var(--ax-red);padding:3px 9px;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;border-radius:3px}
+.ax-g-soon{position:absolute;top:10px;right:10px;z-index:2;background:var(--ax-red);color:#fff;padding:3px 9px;font-size:.7rem;font-weight:700;border-radius:3px}
+.ax-g-count{max-width:1200px;margin:16px auto 0;color:var(--ax-mute);font-size:.85rem;text-align:center}
+.ax-g-cta{max-width:1200px;margin:32px auto 0;text-align:center;padding:24px;border:1px dashed var(--ax-line);border-radius:12px}
+.ax-g-cta p{margin:0 0 14px;color:var(--ax-mute)}
+.ax-g-btn{display:inline-block;background:var(--ax-red);color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:700}
+.ax-g-btn:hover{filter:brightness(1.15)}
+.ax-lb{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+.ax-lb[hidden]{display:none}
+.ax-lb figure{margin:0;max-width:min(1200px,92vw);text-align:center}
+.ax-lb img{max-width:100%;max-height:78vh;border-radius:8px;border:1px solid var(--ax-line,#2a2a30)}
+.ax-lb figcaption{color:#f2f2f2;margin-top:12px;font-size:.95rem}
+.ax-lb button{position:absolute;background:rgba(255,255,255,.08);border:0;color:#fff;cursor:pointer;border-radius:50%;width:46px;height:46px;font-size:28px;line-height:1}
+.ax-lb button:hover{background:#e11d2e}
+.ax-lb-x{top:16px;right:16px}
+.ax-prev{left:16px}.ax-next{right:16px}
+@keyframes axIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media(max-width:640px){.ax-gallery{padding:48px 14px}.ax-g-item.wide{grid-column:span 1}.ax-g-grid{grid-template-columns:1fr}.ax-g-cap,.ax-g-item::after{opacity:1;transform:none}.ax-lb-n{top:auto;bottom:16px}}
+@media(prefers-reduced-motion:reduce){.ax-g-item,.ax-g-item img{animation:none;transition:none}}
+</style>
+
+<script>
+(function(){
+  /* ADD NEW PHOTOS HERE. One line per photo.
+     cat must be one of: Tankers, Reefers, Heavy haul, Tippers, Night, Multiplayer */
+  var P='images/gallery/';
+  var ITEMS=[
+    {src:P+'04-reefer-black.jpg',cat:'Reefers',cap:'Black Apex reefer on the highway',wide:true},
+    {src:P+'01-reefer-white.jpg',cat:'Reefers',cap:'White Apex reefer with blue beacons'},
+    {src:P+'13-tanker-city.jpg',cat:'Tankers',cap:'Red and black tanker in the city'},
+    {src:P+'08-tanker-camo.jpg',cat:'Tankers',cap:'Camo cab with the Apex tanker',wide:true},
+    {src:P+'14-heavy-haul-rain.jpg',cat:'Heavy haul',cap:'Wheel loader on a low loader in the rain'},
+    {src:P+'10-ford-lowloader.jpg',cat:'Heavy haul',cap:'Ford with a wrapped heavy load'},
+    {src:P+'11-tipper-dock.jpg',cat:'Tippers',cap:'Scania with the Apex tipper at the dock',wide:true},
+    {src:P+'05-tipper-rear.jpg',cat:'Tippers',cap:'Apex tipper from the rear'},
+    {src:P+'03-mixer-black.jpg',cat:'Tippers',cap:'Apex concrete mixer'},
+    {src:P+'12-flatbed-dusk.jpg',cat:'Heavy haul',cap:'Flatbed run at dusk'},
+    {src:P+'15-container-maersk.jpg',cat:'Reefers',cap:'Container run through town'},
+    {src:P+'06-night-convoy.jpg',cat:'Night',cap:'Three Apex trucks, night convoy',wide:true},
+    {src:P+'07-night-yard.jpg',cat:'Night',cap:'Red Apex Scania at the yard'},
+    {src:P+'09-scania-red-white.jpg',cat:'Night',cap:'Red and white Scania parked up'},
+    {src:P+'02-multiplayer-meetup.jpg',cat:'Multiplayer',cap:'Multiplayer meetup with another crew',soon:true}
+  ];
+
+  var grid=document.getElementById('axGrid'),fil=document.getElementById('axFilters'),
+      cnt=document.getElementById('axCount'),lb=document.getElementById('axLb'),
+      img=document.getElementById('axImg'),cap=document.getElementById('axCap');
+  var cats=['All'],cur='All',view=[],idx=0,lastFocus=null;
+  ITEMS.forEach(function(i){if(cats.indexOf(i.cat)<0)cats.push(i.cat)});
+
+  cats.forEach(function(c){
+    var b=document.createElement('button');b.type='button';b.textContent=c;
+    if(c==='All')b.className='on';
+    b.onclick=function(){cur=c;[].forEach.call(fil.children,function(x){x.className=x===b?'on':''});render()};
+    fil.appendChild(b);
+  });
+
+  function render(){
+    view=ITEMS.filter(function(i){return cur==='All'||i.cat===cur});
+    grid.innerHTML='';
+    view.forEach(function(it,n){
+      var b=document.createElement('button');b.type='button';
+      b.className='ax-g-item'+(it.wide&&cur==='All'?' wide':'');
+      b.style.animationDelay=(n*40)+'ms';
+      b.setAttribute('aria-label','Open photo: '+it.cap);
+      b.innerHTML='<img loading="lazy" decoding="async" src="'+it.src+'" alt="'+it.cap+'">'+
+        '<span class="ax-g-tag">'+it.cat+'</span>'+
+        (it.soon?'<span class="ax-g-soon">Coming soon</span>':'')+
+        '<span class="ax-g-cap">'+it.cap+'</span>';
+      b.onclick=function(){open(n)};
+      grid.appendChild(b);
+    });
+    cnt.textContent=view.length+(view.length===1?' photo':' photos');
+  }
+  function show(){var it=view[idx];img.src=it.src;img.alt=it.cap;cap.textContent=it.cap+'  ('+(idx+1)+' of '+view.length+')'}
+  function open(n){lastFocus=document.activeElement;idx=n;show();lb.hidden=false;document.body.style.overflow='hidden';document.getElementById('axClose').focus()}
+  function close(){lb.hidden=true;document.body.style.overflow='';if(lastFocus)lastFocus.focus()}
+  function step(d){idx=(idx+d+view.length)%view.length;show()}
+  document.getElementById('axClose').onclick=close;
+  document.getElementById('axPrev').onclick=function(){step(-1)};
+  document.getElementById('axNext').onclick=function(){step(1)};
+  lb.addEventListener('click',function(e){if(e.target===lb)close()});
+  document.addEventListener('keydown',function(e){
+    if(lb.hidden)return;
+    if(e.key==='Escape')close();
+    if(e.key==='ArrowLeft')step(-1);
+    if(e.key==='ArrowRight')step(1);
+  });
+  var sx=0;
+  lb.addEventListener('touchstart',function(e){sx=e.touches[0].clientX},{passive:true});
+  lb.addEventListener('touchend',function(e){var d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>50)step(d<0?1:-1)});
+  render();
+})();
+</script>
