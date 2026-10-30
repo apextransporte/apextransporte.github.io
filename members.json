@@ -1,6 +1,6 @@
 {
   "member_count": 47,
-  "visitor_count": 15,
+  "visitor_count": 19,
   "members": [
     {
       "id": "883723046320484362",
@@ -464,6 +464,15 @@
       "joined": "2026-07-01T16:29:59.775000+00:00"
     },
     {
+      "id": "1506186792280526978",
+      "name": "bless_1233",
+      "username": "bless_1233",
+      "global_name": null,
+      "nick": null,
+      "avatar": null,
+      "joined": "2026-10-24T13:15:28.579000+00:00"
+    },
+    {
       "id": "1396074250577772625",
       "name": "BT MAX",
       "username": "gamingmax2025",
@@ -527,6 +536,15 @@
       "joined": "2026-07-16T12:29:25.118000+00:00"
     },
     {
+      "id": "989736401723605013",
+      "name": "S3baS71N",
+      "username": "reddragonshinegami",
+      "global_name": "S3baS71N",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/989736401723605013/c36abc23a6831c4358ec46ded2aba3d0.png?size=128",
+      "joined": "2026-10-11T08:32:38.206000+00:00"
+    },
+    {
       "id": "1544051891682545694",
       "name": "Scorgee🤞",
       "username": "scorgee._31125",
@@ -534,6 +552,15 @@
       "nick": null,
       "avatar": null,
       "joined": "2026-10-24T13:53:37.995000+00:00"
+    },
+    {
+      "id": "1533109158231150615",
+      "name": "Sérgio Paulo",
+      "username": "sergiopaulo0440",
+      "global_name": "Sérgio Paulo",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1533109158231150615/b41774bf8239da771f8c2241b3e9a44b.png?size=128",
+      "joined": "2026-08-12T19:17:34.089000+00:00"
     },
     {
       "id": "923463582522437643",
@@ -561,6 +588,15 @@
       "nick": "⟅ 𝐇𝐋𝐓 ⟆ DiSousa",
       "avatar": "https://cdn.discordapp.com/avatars/160195519463948289/191d82e498af5d82e465e714b6597958.png?size=128",
       "joined": "2026-08-05T05:43:12.371000+00:00"
+    },
+    {
+      "id": "1459211969381924876",
+      "name": "𝓞𝓰𝓚𝓹𝓪𝓴𝓹𝓸",
+      "username": "ogkpakpo",
+      "global_name": "𝓞𝓰𝓚𝓹𝓪𝓴𝓹𝓸",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1459211969381924876/149cb5ec0875ff2060b0f7dd12f5aaa6.png?size=128",
+      "joined": "2026-10-24T21:08:15.037000+00:00"
     }
   ]
 }
