@@ -14,10 +14,12 @@ def parse_date(value):
 
 
 def norm(name):
-    """Lower case, no spaces around names, and no Apex tag in front.
-    Apex|phantom, Apex | Phantom and PHANTOM all become phantom."""
+    """Lower case, no spaces around names, no Apex tag in front and no ! mark in front.
+    Apex|phantom, Apex | Phantom and PHANTOM all become phantom.
+    !Yoshi, !yoshi and Yoshi all become yoshi."""
     text = str(name or "").strip().lower()
     text = re.sub(r"^\s*apex\s*[|\u2223\uff5c/]\s*", "", text)
+    text = re.sub(r"^[!\s]+", "", text)
     return re.sub(r"\s+", " ", text).strip()
 
 
@@ -42,8 +44,9 @@ def estimate_net_worth(jobs, path="net_worth_base.json"):
 
 def find_net_worth(totals, name):
     """Returns the estimated net worth for a Discord name, or None when the name has no base."""
+    target = norm(name)
     for k, v in totals.items():
-        if norm(k) == norm(name):
+        if norm(k) == target:
             return v
     return None
 
