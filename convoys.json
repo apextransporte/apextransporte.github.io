@@ -1,16 +1,3 @@
 {
-  "convoys": [
-    {
-      "title": "Nuremberg To Munich Testing",
-      "start": 1793523000,
-      "route": "Nuremberg To Munich",
-      "notes": "Just test the functionality of the Apex data and if the convoy be posted on website too",
-      "host": "Apex | keem",
-      "slots": 5,
-      "drivers": [
-        "Apex | keem",
-        "𝐀𝐏𝐄𝐗<>𝐀𝐍𝐀𝐒"
-      ]
-    }
-  ]
+  "convoys": []
 }
