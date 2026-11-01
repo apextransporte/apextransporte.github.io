@@ -1,9 +1,9 @@
 {
- "messages_loaded": 100,
+ "messages_loaded": 1100,
  "newest_message": "2026-11-01T06:00:12.985000+00:00",
  "newest_saved_job": "2026-11-01T06:00:12.985000+00:00",
- "time_limit_hit": false,
- "images_waiting": 0,
+ "time_limit_hit": true,
+ "images_waiting": 6,
  "images_failed": 12,
  "newest_images": [
   {
