@@ -1,6 +1,6 @@
 {
   "member_count": 45,
-  "visitor_count": 19,
+  "visitor_count": 20,
   "members": [
     {
       "id": "883723046320484362",
@@ -219,6 +219,15 @@
       "joined": "2026-05-16T16:17:50.187000+00:00"
     },
     {
+      "id": "1348229947155808309",
+      "name": "APEX | Niel ™",
+      "username": "niel06330",
+      "global_name": "Niel™",
+      "nick": "APEX | Niel ™",
+      "avatar": "https://cdn.discordapp.com/avatars/1348229947155808309/63edbf557efa3f165e6ec536aadec76e.png?size=128",
+      "joined": "2026-04-20T18:21:37.829000+00:00"
+    },
+    {
       "id": "1454046493777330270",
       "name": "Apex | Night",
       "username": "seira.night",
@@ -390,15 +399,6 @@
       "joined": "2026-07-28T09:19:05.151000+00:00"
     },
     {
-      "id": "1348229947155808309",
-      "name": "| Niel ™",
-      "username": "niel06330",
-      "global_name": "Niel™",
-      "nick": "| Niel ™",
-      "avatar": "https://cdn.discordapp.com/avatars/1348229947155808309/63edbf557efa3f165e6ec536aadec76e.png?size=128",
-      "joined": "2026-04-20T18:21:37.829000+00:00"
-    },
-    {
       "id": "1561324000309682359",
       "name": "𝐀𝐏𝐄𝐗<>𝐀𝐍𝐀𝐒",
       "username": "anas_6.1",
@@ -561,6 +561,15 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/923463582522437643/d94aa34a8d7ad8097c7045e48154973b.png?size=128",
       "joined": "2026-10-15T09:50:54.142000+00:00"
+    },
+    {
+      "id": "1496011205616336940",
+      "name": "Zenith 1267@#₹",
+      "username": "zenith1267rs",
+      "global_name": "Zenith 1267@#₹",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1496011205616336940/5445ffd7ffb201a98393cbdf684ea4b1.png?size=128",
+      "joined": "2026-11-01T12:35:05.359000+00:00"
     },
     {
       "id": "1545349793763823679",
