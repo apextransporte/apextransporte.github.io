@@ -99,6 +99,9 @@ dt{color:var(--muted)}dd{margin:0;font-weight:600;text-align:right}
 .dep b{font-family:var(--head);font-size:34px;line-height:1;color:#ff4a4a}
 .dep h3{font-family:var(--head);font-size:26px;line-height:1.1;margin:0}
 .dep p{margin:0;color:#c4c4c4;font-size:16px}
+.dep b small{display:block;margin-top:8px;font-family:inherit;font-size:15px;font-weight:400;color:#c4c4c4}
+.dep p+p{margin-top:4px}
+.dep .full{color:#ff4a4a}
 
 footer{margin-top:64px;background:#000;color:#b5b5b5;font-size:15px;padding:26px 0;border-top:5px solid var(--red)}
 footer .wrap{display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-between}
@@ -408,7 +411,7 @@ footer a{margin-right:18px}
     <h2>Departures</h2>
     <p class="sub">Multiplayer convoys start when testing ends.</p>
     <div class="board">
-      <div class="dep"><b>Coming soon</b><div><h3>Multiplayer convoy</h3><p>Multiplayer is still in testing. We post the first convoy dates here and on Discord.</p></div></div>
+      <div class="dep" id="convoy-placeholder"><b>Coming soon</b><div><h3>Multiplayer convoy</h3><p>Multiplayer is still in testing. We post the first convoy dates here and on Discord.</p></div></div>
       <div class="dep"><b>Every week</b><div><h3>Events and prize giveaways</h3><p>Join in, meet new drivers, and show up for a chance to win.</p></div></div>
     </div>
   </div></section>
@@ -556,5 +559,47 @@ dl.notes dd{margin:0;font-weight:600;text-align:right}
 </style>
 
 
+
+<script>
+(async function () {
+  var board = document.querySelector("#events .board");
+  if (!board) return;
+  function el(tag, text) {
+    var n = document.createElement(tag);
+    if (text) n.textContent = text;
+    return n;
+  }
+  try {
+    var res = await fetch("convoys.json?t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) return;
+    var data = await res.json();
+    var now = Date.now() / 1000;
+    var list = (data.convoys || []).filter(function (c) { return c.start > now - 7200; });
+    if (!list.length) return;
+    var placeholder = document.getElementById("convoy-placeholder");
+    if (placeholder) placeholder.style.display = "none";
+    list.slice().reverse().forEach(function (c) {
+      var d = new Date(c.start * 1000);
+      var row = el("div");
+      row.className = "dep";
+      var b = el("b", d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" }));
+      b.appendChild(el("small", d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) + " your time"));
+      var box = el("div");
+      box.appendChild(el("h3", c.title));
+      box.appendChild(el("p", "Route: " + c.route));
+      if (c.notes) box.appendChild(el("p", c.notes));
+      var n = c.drivers.length;
+      var line = el("p", "Host: " + c.host + ". Drivers: " + n + "/" + c.slots + (n >= c.slots ? ". Full." : "."));
+      if (n >= c.slots) line.className = "full";
+      box.appendChild(line);
+      if (n) box.appendChild(el("p", c.drivers.join(", ")));
+      box.appendChild(el("p", "Join in the Discord convoy channel."));
+      row.appendChild(b);
+      row.appendChild(box);
+      board.insertBefore(row, board.firstChild);
+    });
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>
