@@ -231,6 +231,20 @@ footer a{margin-right:18px}
 @media (prefers-reduced-motion:reduce){.tile,.card,.lbpanel,.dcard,.event,.dep,.rank,.chip,.nw{transition:none}.tile:hover,.dcard:hover,.event:hover,.dep:hover{transform:none;box-shadow:none}}
 .cicon-sm{width:18px;height:18px;color:var(--red);vertical-align:-4px;margin-right:8px;flex:none}
 .lb h3 .cicon-sm{color:var(--paper);vertical-align:-3px}
+
+/* Key rules */
+#rules .rules-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+#rules .rules-list li{background:var(--paper);border:1px solid #2a2a2a;border-left:5px solid var(--red);border-radius:4px;padding:14px 16px;display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start}
+#rules .rules-num{font-family:var(--head);font-weight:900;font-size:28px;line-height:1;color:var(--red)}
+#rules .rules-title{margin:0 0 2px;font-weight:600;color:var(--ink)}
+#rules .rules-text{margin:0;color:var(--muted);font-size:15px;line-height:1.5}
+#rules .rules-more{margin-top:14px;background:var(--paper);border:1px solid #2a2a2a;border-radius:4px}
+#rules .rules-more summary{cursor:pointer;padding:14px 16px;font-weight:600;color:var(--ink);list-style:none}
+#rules .rules-more summary::-webkit-details-marker{display:none}
+#rules .rules-more[open] summary{border-bottom:1px solid #2a2a2a}
+#rules .rules-more .rules-list{padding:12px}
+#rules .rules-btn{margin-top:20px}
+@media (max-width:480px){#rules .rules-list li{grid-template-columns:30px 1fr;padding:12px}}
 </style>
 <style>
 /* reserved space so late data does not push the page */
@@ -254,6 +268,7 @@ footer a{margin-right:18px}
       <li><a href="#crew">Crew</a></li>
       <li><a href="#members">Members</a></li>
       <li><a href="#perks">Perks</a></li>
+      <li><a href="#rules">Rules</a></li>
       <li><a href="#join">Join</a></li>
       <li><a href="#events">Events</a></li>
       <li><a class="btn red" href="#join">Apply</a></li>
@@ -394,6 +409,34 @@ footer a{margin-right:18px}
       <div class="perk"><svg class="cicon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.3 19 6v6c0 4.6-3 7.7-7 8.7-4-1-7-4.1-7-8.7V6Z"/><path d="m8.7 12 2.3 2.3 4.3-4.6"/></svg><h3>Verified, safe server</h3><p>A safe place for all skill levels.</p></div>
       <div class="perk"><svg class="cicon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-9.5-9C1 7.5 3 4 6.5 4c2 0 3.4 1.1 4.5 2.6C12.1 5.1 13.5 4 15.5 4 19 4 21 7.5 19.5 11c-2 4.4-9.5 9-9.5 9Z"/></svg><h3>Friendly staff</h3><p>A supportive team ready to help.</p></div>
     </div>
+  </div></section>
+
+  <section id="rules"><div class="wrap">
+    <h2>Key rules</h2>
+    <p class="sub">Keep the server safe and friendly for every driver. Read these five first.</p>
+    <ol class="rules-list">
+      <li><span class="rules-num">1</span><div><p class="rules-title">Respect everyone</p><p class="rules-text">No hate speech, personal attacks or arguments over politics. English is the main language.</p></div></li>
+      <li><span class="rules-num">2</span><div><p class="rules-title">Keep it clean</p><p class="rules-text">No NSFW content, malware or pirated software. Never share personal details.</p></div></li>
+      <li><span class="rules-num">3</span><div><p class="rules-title">One account only</p><p class="rules-text">No alt or fake accounts. Do not impersonate staff.</p></div></li>
+      <li><span class="rules-num">4</span><div><p class="rules-title">No mods, no sharing skins</p><p class="rules-text">Modded game clients mean a ban. Company skins stay with official members.</p></div></li>
+      <li><span class="rules-num">5</span><div><p class="rules-title">Follow staff</p><p class="rules-text">Respect staff decisions. Report problems to a Moderator and do not confront others in public.</p></div></li>
+    </ol>
+    <details class="rules-more">
+      <summary>Show all 10 rules</summary>
+      <ol class="rules-list">
+        <li><span class="rules-num">1</span><div><p class="rules-title">Appropriate use of channels</p><p class="rules-text">Use each text and voice channel for its purpose only. English is the primary language.</p></div></li>
+        <li><span class="rules-num">2</span><div><p class="rules-title">Respectful communication</p><p class="rules-text">No discrimination, hate speech or personal attacks. Do not start arguments or debate inflammatory topics like politics.</p></div></li>
+        <li><span class="rules-num">3</span><div><p class="rules-title">No spam or disruption</p><p class="rules-text">No flooding, 3 or more emojis in a row, excessive tags or ghost tags. No backseat moderation. Do not impersonate staff.</p></div></li>
+        <li><span class="rules-num">4</span><div><p class="rules-title">Privacy and safety</p><p class="rules-text">Share no real names, addresses, emails or phone numbers. No NSFW content, malware, pirated software, illegal material or flashing images.</p></div></li>
+        <li><span class="rules-num">5</span><div><p class="rules-title">Self-promotion and advertising</p><p class="rules-text">No ads, server invites, donation requests or event promotion. Relevant Twitch or YouTube links are fine in moderation.</p></div></li>
+        <li><span class="rules-num">6</span><div><p class="rules-title">Account and identity integrity</p><p class="rules-text">One account per person. No alt accounts. Do not use special characters to distort your nickname. Staff may change nicknames.</p></div></li>
+        <li><span class="rules-num">7</span><div><p class="rules-title">Respect for staff and community</p><p class="rules-text">No harassment of staff in channels or DMs. Follow staff instructions. Do not beg for gifts or purchases.</p></div></li>
+        <li><span class="rules-num">8</span><div><p class="rules-title">External content</p><p class="rules-text">No defamatory comments or reviews about other game companies or communities.</p></div></li>
+        <li><span class="rules-num">9</span><div><p class="rules-title">Client modifications</p><p class="rules-text">Modified or unauthorized game clients, such as modded APKs, lead to a ban.</p></div></li>
+        <li><span class="rules-num">10</span><div><p class="rules-title">Company skins</p><p class="rules-text">Never share company skins with other users or unofficial users.</p></div></li>
+      </ol>
+    </details>
+    <a class="btn red rules-btn" href="https://discord.gg/WquCCGx4RX" target="_blank" rel="noopener">Read the rules on Discord</a>
   </div></section>
 
   <section id="join"><div class="wrap">
