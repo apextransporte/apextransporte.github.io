@@ -53,8 +53,16 @@ jobs:
           git add -A -- '*.json'
           if git diff --cached --quiet; then
             echo "Nothing to save"
-          else
-            git commit -m "Update stats"
-            git pull --rebase origin main
-            git push origin HEAD:main
+            exit 0
           fi
+          git commit -m "Update stats"
+          for i in 1 2 3; do
+            if git pull --rebase -X theirs origin main && git push origin HEAD:main; then
+              echo "Saved on try $i"
+              exit 0
+            fi
+            git rebase --abort || true
+            sleep 5
+          done
+          echo "Could not save after 3 tries"
+          exit 1
