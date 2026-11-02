@@ -95,7 +95,7 @@ def fmt_money(value):
     if value is None:
         return "n/a"
     if value >= 1_000_000:
-        return "${:.1f}M".format(value / 1_000_000)
+        return "\u20ac{:.1f}M".format(value / 1_000_000)
     if value >= 1_000:
-        return "${:.1f}k".format(value / 1_000)
-    return "${:,.0f}".format(value)
+        return "\u20ac{:.1f}k".format(value / 1_000)
+    return "\u20ac{:,.0f}".format(value)

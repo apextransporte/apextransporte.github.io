@@ -900,7 +900,7 @@ def full_money(value):
     """Shows the whole figure, for example $739,200, never $739.2k. An empty or zero value keeps the old look."""
     if not value:
         return fmt_money(value)
-    return "${:,}".format(int(round(value)))
+    return "\u20ac{:,}".format(int(round(value)))
 
 
 def auto_net_worth(net_worth, name):
@@ -1518,6 +1518,8 @@ def main():
             }
         )
     data["members"] = table
+    # Total net worth is the sum of the listed members, so it matches the bot /stats card
+    data["networth"] = full_money(sum(int(re.sub(r"\D", "", t["networth"]) or 0) for t in table))
     data["rankings"] = build_rankings(jobs, table)
     data["daily"] = build_daily(jobs)
     for m in members.values():

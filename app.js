@@ -150,7 +150,7 @@ const APEX_FEED_URL = "";
     put(row, "Fuel", m.last_fuel);
     put(row, "Income", m.last_income);
     put(row, "Level", levelOf(m));
-    if (m.networth && m.networth !== "$0") { put(row, "Net worth", m.networth); row.setAttribute("data-nw", "bot"); }
+    if (m.networth && m.networth !== "\u20ac0") { put(row, "Net worth", m.networth); row.setAttribute("data-nw", "bot"); }
   }
   function setStat(key, val) {
     var el = document.querySelector('[data-stat="' + key + '"] b');
@@ -178,7 +178,7 @@ const APEX_FEED_URL = "";
   }
   function money(n) {
     if (n == null) return null;
-    return "$" + Math.round(n).toLocaleString("en-US");
+    return "\u20ac" + Math.round(n).toLocaleString("en-US");
   }
   function kmText(n) {
     if (n == null) return null;
