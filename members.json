@@ -1,6 +1,6 @@
 {
   "member_count": 45,
-  "visitor_count": 20,
+  "visitor_count": 21,
   "members": [
     {
       "id": "883723046320484362",
@@ -507,6 +507,15 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/1457546936063361097/5445ffd7ffb201a98393cbdf684ea4b1.png?size=128",
       "joined": "2026-01-05T02:06:00.348000+00:00"
+    },
+    {
+      "id": "641415187588579359",
+      "name": "IronKnight",
+      "username": "ironknight6615",
+      "global_name": "IronKnight",
+      "nick": null,
+      "avatar": null,
+      "joined": "2026-11-02T23:28:55.149000+00:00"
     },
     {
       "id": "1276846780016758835",
