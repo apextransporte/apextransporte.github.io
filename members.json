@@ -1,5 +1,5 @@
 {
-  "member_count": 45,
+  "member_count": 46,
   "visitor_count": 22,
   "members": [
     {
@@ -395,7 +395,7 @@
       "username": "ghost_7721",
       "global_name": "Yusuf",
       "nick": null,
-      "avatar": "https://cdn.discordapp.com/avatars/1330925591024894018/f186083e472e425c0a88e169f70611c0.png?size=128",
+      "avatar": "https://cdn.discordapp.com/avatars/1330925591024894018/4db5c5aabc7066229843d7db67cd7484.png?size=128",
       "joined": "2026-07-28T09:19:05.151000+00:00"
     },
     {
@@ -406,6 +406,15 @@
       "nick": "𝐀𝐏𝐄𝐗<>𝐀𝐍𝐀𝐒",
       "avatar": "https://cdn.discordapp.com/avatars/1561324000309682359/9b5901f1a74860ef70ce6023115525d7.png?size=128",
       "joined": "2026-10-19T16:49:38.152000+00:00"
+    },
+    {
+      "id": "1288642064078078075",
+      "name": "𝓜𝓻 •𝓢𝓵𝓲𝓶𝓮 •𝓐 ✪ 🇩🇪",
+      "username": "de_realone_agyei",
+      "global_name": "𝓜𝓻 •𝓢𝓵𝓲𝓶𝓮 •𝓐 ✪ 🇩🇪",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1288642064078078075/c757440bb87160ce79593e4bda340bf7.png?size=128",
+      "joined": "2026-11-04T17:34:46.151000+00:00"
     }
   ],
   "visitors": [
@@ -435,6 +444,15 @@
       "nick": null,
       "avatar": null,
       "joined": "2026-10-11T10:39:02.377000+00:00"
+    },
+    {
+      "id": "1405832496784085004",
+      "name": "Apex | Kwame",
+      "username": "sunfightergao",
+      "global_name": "Kwame_Azum",
+      "nick": "Apex | Kwame",
+      "avatar": "https://cdn.discordapp.com/avatars/1405832496784085004/59b86d440cae2d0f62af64f9b4b1033e.png?size=128",
+      "joined": "2026-11-04T18:56:35.743000+00:00"
     },
     {
       "id": "1308555542569943061",
@@ -597,15 +615,6 @@
       "nick": "⟅ 𝐇𝐋𝐓 ⟆ DiSousa",
       "avatar": "https://cdn.discordapp.com/avatars/160195519463948289/191d82e498af5d82e465e714b6597958.png?size=128",
       "joined": "2026-08-05T05:43:12.371000+00:00"
-    },
-    {
-      "id": "1288642064078078075",
-      "name": "𝓜𝓻 •𝓢𝓵𝓲𝓶𝓮 •𝓐 ✪ 🇩🇪",
-      "username": "de_realone_agyei",
-      "global_name": "𝓜𝓻 •𝓢𝓵𝓲𝓶𝓮 •𝓐 ✪ 🇩🇪",
-      "nick": null,
-      "avatar": "https://cdn.discordapp.com/avatars/1288642064078078075/c757440bb87160ce79593e4bda340bf7.png?size=128",
-      "joined": "2026-11-04T17:34:46.151000+00:00"
     }
   ]
 }
