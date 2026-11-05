@@ -1,6 +1,6 @@
 {
   "member_count": 47,
-  "visitor_count": 23,
+  "visitor_count": 24,
   "members": [
     {
       "id": "883723046320484362",
@@ -91,6 +91,15 @@
       "nick": "Apex | Appa",
       "avatar": "https://cdn.discordapp.com/avatars/1483271284136742954/ca8336fdbccd7b884aa54ba2c0a0b9ce.png?size=128",
       "joined": "2026-04-25T13:58:25.772000+00:00"
+    },
+    {
+      "id": "1549808661566718066",
+      "name": "Apex | Baku★",
+      "username": "baku00403",
+      "global_name": "Baku★",
+      "nick": "Apex | Baku★",
+      "avatar": "https://cdn.discordapp.com/avatars/1549808661566718066/1f2a325782d9923d64537f82425e001d.png?size=128",
+      "joined": "2026-11-05T04:25:49.599000+00:00"
     },
     {
       "id": "1140583824552628244",
@@ -363,15 +372,6 @@
       "joined": "2026-09-08T15:58:22.398000+00:00"
     },
     {
-      "id": "1549808661566718066",
-      "name": "Baku★",
-      "username": "baku00403",
-      "global_name": "Baku★",
-      "nick": null,
-      "avatar": "https://cdn.discordapp.com/avatars/1549808661566718066/1f2a325782d9923d64537f82425e001d.png?size=128",
-      "joined": "2026-11-05T04:25:49.599000+00:00"
-    },
-    {
       "id": "1249663946709794967",
       "name": "Goku black 🩹♥",
       "username": "lamperouge_11",
@@ -633,6 +633,15 @@
       "nick": "⟅ 𝐇𝐋𝐓 ⟆ DiSousa",
       "avatar": "https://cdn.discordapp.com/avatars/160195519463948289/191d82e498af5d82e465e714b6597958.png?size=128",
       "joined": "2026-08-05T05:43:12.371000+00:00"
+    },
+    {
+      "id": "1427022566060593162",
+      "name": "𝐸𝑢𝑟𝑜𝑝𝑒 𝑠𝑘𝑖𝑛𝑠 3",
+      "username": "123zxcasdqwe_71211",
+      "global_name": "𝐸𝑢𝑟𝑜𝑝𝑒 𝑠𝑘𝑖𝑛𝑠 3",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1427022566060593162/8a4e5e871e3c048ef941e0424cf4e056.png?size=128",
+      "joined": "2026-11-05T10:22:00.032000+00:00"
     }
   ]
 }
