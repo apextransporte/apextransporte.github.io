@@ -1,5 +1,5 @@
 {
-  "member_count": 47,
+  "member_count": 48,
   "visitor_count": 24,
   "members": [
     {
@@ -181,6 +181,15 @@
       "nick": "Apex | Kritika",
       "avatar": "https://cdn.discordapp.com/avatars/1485622384630300782/64db21d8191c8e69b51c986bc192195e.png?size=128",
       "joined": "2026-04-28T15:20:58.491000+00:00"
+    },
+    {
+      "id": "1405832496784085004",
+      "name": "Apex | Kwame",
+      "username": "sunfightergao",
+      "global_name": "Kwame_Azum",
+      "nick": "Apex | Kwame",
+      "avatar": "https://cdn.discordapp.com/avatars/1405832496784085004/59b86d440cae2d0f62af64f9b4b1033e.png?size=128",
+      "joined": "2026-11-04T18:56:35.743000+00:00"
     },
     {
       "id": "1500853024245944410",
@@ -455,15 +464,6 @@
       "joined": "2026-10-11T10:39:02.377000+00:00"
     },
     {
-      "id": "1405832496784085004",
-      "name": "Apex | Kwame",
-      "username": "sunfightergao",
-      "global_name": "Kwame_Azum",
-      "nick": "Apex | Kwame",
-      "avatar": "https://cdn.discordapp.com/avatars/1405832496784085004/59b86d440cae2d0f62af64f9b4b1033e.png?size=128",
-      "joined": "2026-11-04T18:56:35.743000+00:00"
-    },
-    {
       "id": "1308555542569943061",
       "name": "APEX |Rorisang",
       "username": "rorisang2002",
@@ -552,6 +552,15 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/1518648370011312192/6623a69c88d6ffd7518df119d5c195bc.png?size=128",
       "joined": "2026-11-03T02:45:57.442000+00:00"
+    },
+    {
+      "id": "1518425652481495051",
+      "name": "Galileo myers",
+      "username": "galileo04738",
+      "global_name": "Galileo myers",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1518425652481495051/0b1d1f3b8cc73c41f076645f8d1c070c.png?size=128",
+      "joined": "2026-11-05T20:48:58.332000+00:00"
     },
     {
       "id": "641415187588579359",
