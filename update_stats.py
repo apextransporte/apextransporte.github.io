@@ -803,6 +803,7 @@ def name_matches(name, wanted):
 # Every job income posted after that time is added to it automatically.
 START_NET_WORTH = {
     "yusuf": {"amount": 16222, "since": "2026-10-27T14:27:00+03:00"},
+    "mrx": {"amount": 1327955, "since": "2026-11-06T14:56:00+03:00"},
 }
 
 
