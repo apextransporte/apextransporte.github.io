@@ -144,6 +144,7 @@ const APEX_FEED_URL = "";
     return t ? t[1] : null;
   }
   function apply(row, m) {
+    if (m.id) row.setAttribute("data-id", String(m.id));   // stable Discord ID of the driver shown in this row
     put(row, "Total distance", m.distance, "Total from job log screenshots");
     put(row, "Last job", m.last_km);
     put(row, "Time", m.last_time);
@@ -287,6 +288,33 @@ const APEX_FEED_URL = "";
         var m = find(name);
         if (m) apply(row, m);
         table.appendChild(row);
+      });
+      /* ID pass: every driver in data.json shows his own stats, even after a new emoji, tag or name. */
+      function loose(s) {
+        return String(s || "").normalize("NFKC").toLowerCase().split(/[^\p{L}\p{N}]+/u)
+          .filter(function (t) { return t && t !== "apex" && t !== "the" && t !== "tm"; }).join("");
+      }
+      function allRows() { return [].slice.call(table.querySelectorAll(".jr:not(.hd)")); }
+      var byId = {};
+      allRows().forEach(function (r) { var id = r.getAttribute("data-id"); if (id) byId[id] = r; });
+      members.forEach(function (m) {
+        if (!m.id || byId[m.id]) return;
+        var key = loose(m.name), target = null;
+        if (key) allRows().forEach(function (r) {
+          if (target || r.getAttribute("data-id")) return;
+          if (loose(r.querySelector("b").textContent) === key) target = r;
+        });
+        if (!target) { target = newRow(m.name); table.appendChild(target); }
+        apply(target, m);
+        byId[m.id] = target;
+      });
+      allRows().forEach(function (r) {   /* remove an empty twin of a driver who already has his row */
+        if (r.getAttribute("data-id")) return;
+        var key = loose(r.querySelector("b").textContent);
+        if (!key) return;
+        for (var id in byId) {
+          if (byId[id] !== r && loose(byId[id].querySelector("b").textContent) === key) { r.remove(); return; }
+        }
       });
       var c = document.getElementById("jobCount");
       if (c) c.textContent = table.querySelectorAll(".jr:not(.hd)").length + " drivers";

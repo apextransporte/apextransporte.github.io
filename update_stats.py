@@ -1517,6 +1517,7 @@ def main():
         table.append(
             {
                 "name": m["name"],
+                "id": str(m["author"]),   # stable Discord ID, never changes when the name changes
                 "runs": str(m["runs"]),
                 "distance": "{:,} km".format(m["km"]),
                 "hours": fmt_time(m["minutes"]),
@@ -1542,6 +1543,14 @@ def main():
     data["networth"] = full_money(sum(int(re.sub(r"\D", "", t["networth"]) or 0) for t in table))
     data["rankings"] = build_rankings(jobs, table)
     data["daily"] = build_daily(jobs)
+    # Stable Discord IDs. The bot and the website match drivers by ID, so a new name or emoji never loses the data.
+    ids = {j["name"]: str(j["author"]) for j in jobs}
+    for section in ("level", "clean", "worst"):
+        for row in data["rankings"].get(section, []):
+            row["id"] = ids.get(row["name"], "")
+    for day_rows in data["daily"].values():
+        for row in day_rows:
+            row["id"] = ids.get(row["name"], "")
     for m in members.values():
         if not lookup_net_worth(net_worth, m["name"], m["author"], manual_net_worth):
             print("No net worth for:", m["name"], "Discord ID:", m["author"],
