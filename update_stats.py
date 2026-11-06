@@ -799,6 +799,22 @@ def name_matches(name, wanted):
     return any(cleaned == w or (len(w) >= 4 and cleaned.startswith(w)) for w in wanted)
 
 
+# Fixed kilometers added on top of a driver's real total on every run.
+# The total is rebuilt from the jobs each run, so an amount never counts twice.
+# mrx shows 55,106 km: 4,497 km from his jobs on 2026-11-06 plus 50,609 km.
+DISTANCE_ADDITIONS = {
+    "mrx": 50609,
+}
+
+
+def distance_extra(name):
+    """Extra kilometers for a driver listed in DISTANCE_ADDITIONS, otherwise 0."""
+    for key, km in DISTANCE_ADDITIONS.items():
+        if name_matches(name, [key]):
+            return km
+    return 0
+
+
 # Drivers who start with a fixed net worth. The amount counts from the "since" time.
 # Every job income posted after that time is added to it automatically.
 START_NET_WORTH = {
@@ -1435,6 +1451,7 @@ def main():
         data.setdefault(key, "")
 
     total_km = sum(j["km"] for j in jobs)
+    total_km += sum(distance_extra(n) for n in {j["author"]: j["name"] for j in jobs}.values())
     total_min = sum(j["minutes"] for j in jobs)
     total_income = sum(j["income"] for j in jobs)
     total_fuel = sum(j.get("fuel", 0) for j in jobs)
@@ -1492,6 +1509,8 @@ def main():
         m["last"] = j
         if j["income"] > 0:
             m["last_paid"] = j
+    for m in members.values():
+        m["km"] += distance_extra(m["name"])
     table = []
     for m in sorted(members.values(), key=lambda x: x["km"], reverse=True):
         last = m.get("last_paid") or m["last"]   # a read of 0 income never replaces the last good job
