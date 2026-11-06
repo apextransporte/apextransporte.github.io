@@ -1,5 +1,5 @@
 {
-  "member_count": 48,
+  "member_count": 49,
   "visitor_count": 24,
   "members": [
     {
@@ -91,15 +91,6 @@
       "nick": "Apex | Appa",
       "avatar": "https://cdn.discordapp.com/avatars/1483271284136742954/ca8336fdbccd7b884aa54ba2c0a0b9ce.png?size=128",
       "joined": "2026-04-25T13:58:25.772000+00:00"
-    },
-    {
-      "id": "1549808661566718066",
-      "name": "Apex | Baku★",
-      "username": "baku00403",
-      "global_name": "Baku★",
-      "nick": "Apex | Baku★",
-      "avatar": "https://cdn.discordapp.com/avatars/1549808661566718066/1f2a325782d9923d64537f82425e001d.png?size=128",
-      "joined": "2026-11-05T04:25:49.599000+00:00"
     },
     {
       "id": "1140583824552628244",
@@ -381,6 +372,15 @@
       "joined": "2026-09-08T15:58:22.398000+00:00"
     },
     {
+      "id": "1549808661566718066",
+      "name": "Apex乛Baku★",
+      "username": "baku00403",
+      "global_name": "Apex乛Baku★",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1549808661566718066/1f2a325782d9923d64537f82425e001d.png?size=128",
+      "joined": "2026-11-05T04:25:49.599000+00:00"
+    },
+    {
       "id": "1249663946709794967",
       "name": "Goku black 🩹♥",
       "username": "lamperouge_11",
@@ -415,6 +415,15 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/1434930357828063434/5445ffd7ffb201a98393cbdf684ea4b1.png?size=128",
       "joined": "2026-01-05T01:29:13.107000+00:00"
+    },
+    {
+      "id": "1517016358624165969",
+      "name": "SubAtomic.",
+      "username": "proton.and.neutron",
+      "global_name": "SubAtomic.",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1517016358624165969/e0c8ce24f1bf1e586c6d9c9281fc6488.png?size=128",
+      "joined": "2026-11-06T04:44:29.819000+00:00"
     },
     {
       "id": "1330925591024894018",
