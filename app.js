@@ -737,16 +737,19 @@ const APEX_FEED_URL = "";
   var ALIAS={corpratekeem:"keem",nightwingtir:"nightwingsa"};
   function nz(s){return String(s||"").normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]/gu,"");}
   function tk(s){return String(s||"").normalize("NFKC").toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);}
+  /* Plain letters and digits only, with and without the Apex tag. "Apex乛Baku★" and "Apex | Baku★" give the same key. */
+  function skf(s){var a=String(s||"").normalize("NFKC").toLowerCase().replace(/[^a-z0-9]/g,"");var o=[];if(a.length>=3)o.push(a);var b=a.replace(/^apex/,"");if(b!==a&&b.length>=3)o.push(b);return o;}
   function build(list){
     var out=[];
     list.forEach(function(m){
-      var keys={},toks={};
+      var keys={},toks={},skel={};
       ["name","username","global_name","nick"].forEach(function(f){
         if(!m[f])return;
         var k=nz(m[f]);if(k)keys[k]=1;
+        skf(m[f]).forEach(function(x){skel[x]=1;});
         tk(m[f]).forEach(function(t){toks[t]=1;});
       });
-      out.push({keys:keys,toks:toks});
+      out.push({keys:keys,toks:toks,skel:skel});
     });
     return out;
   }
@@ -755,6 +758,11 @@ const APEX_FEED_URL = "";
     var al=ALIAS[n];if(al){name=al;n=nz(al);}
     var i,p;
     for(i=0;i<pool.length;i++){if(pool[i].keys[n])return i;}
+    var sf=skf(name);
+    if(sf.length){
+      for(i=0;i<pool.length;i++){
+        if(pool[i].skel&&sf.some(function(x){return pool[i].skel[x];}))return i;}
+    }
     var dt=tk(name).filter(function(t){return !STOP[t];});
     if(dt.length){
       for(i=0;i<pool.length;i++){p=pool[i];
