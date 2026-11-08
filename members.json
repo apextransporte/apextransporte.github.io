@@ -1,6 +1,6 @@
 {
-  "member_count": 49,
-  "visitor_count": 25,
+  "member_count": 50,
+  "visitor_count": 24,
   "members": [
     {
       "id": "883723046320484362",
@@ -91,6 +91,15 @@
       "nick": "Apex | Appa",
       "avatar": "https://cdn.discordapp.com/avatars/1483271284136742954/ca8336fdbccd7b884aa54ba2c0a0b9ce.png?size=128",
       "joined": "2026-04-25T13:58:25.772000+00:00"
+    },
+    {
+      "id": "1374147556682104952",
+      "name": "Apex | Astroveil☆",
+      "username": "astralgamer3",
+      "global_name": "/ASTROVEIL☆",
+      "nick": "Apex | Astroveil☆",
+      "avatar": "https://cdn.discordapp.com/avatars/1374147556682104952/272342ac39dc9efb07cf9ca6e38cf33d.png?size=128",
+      "joined": "2026-06-29T19:41:33.127000+00:00"
     },
     {
       "id": "1140583824552628244",
@@ -453,15 +462,6 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/1261822859635068928/abaadf9dce9a8912d0c4bf8c19e7170b.png?size=128",
       "joined": "2026-10-11T08:32:44.849000+00:00"
-    },
-    {
-      "id": "1374147556682104952",
-      "name": "/ASTROVEIL☆",
-      "username": "astralgamer3",
-      "global_name": "/ASTROVEIL☆",
-      "nick": null,
-      "avatar": "https://cdn.discordapp.com/avatars/1374147556682104952/272342ac39dc9efb07cf9ca6e38cf33d.png?size=128",
-      "joined": "2026-06-29T19:41:33.127000+00:00"
     },
     {
       "id": "750152375792042052",
