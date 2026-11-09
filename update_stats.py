@@ -322,7 +322,7 @@ def parse_time(text):
             return None
         rest = t[h + 1:]
     # FIX: the minutes digits are often read as letters, so 0m comes out as Om. LOOKALIKE turns O into 0, l into 1 and S into 5.
-    rest = rest.translate(LOOKALIKE).translate(str.maketrans("i", "1"))
+    rest = rest.translate(LOOKALIKE).translate(str.maketrans("itT", "111"))   # FIX: heavy JPEG compression reads 11 as tt
     mins = re.search(r"(\d{1,2})\s*m", rest.lower())
     if not mins:
         return None
@@ -1249,9 +1249,17 @@ def report_failure(msg, att, kind, why, tries):
         return
     author = msg.get("author", {})
     guild = os.environ.get("GUILD_ID", "")
+    reasons = "- The reader could not read the job card ({})\n- Kind: {}".format(why[:140], kind)
+    try:
+        per_pixel = float(att.get("size")) / (float(att.get("width")) * float(att.get("height")))
+    except (TypeError, ValueError, ZeroDivisionError):
+        per_pixel = None
+    if per_pixel is not None and per_pixel < 0.06:   # a clean 1600 x 720 screenshot weighs 300 KB or more
+        reasons += "\n- The file is heavily compressed ({} KB). Ask the driver to post the original screenshot from the phone gallery.".format(
+            int(att.get("size")) // 1000)
     fields = [
         {"name": "Driver", "value": "<@{}> ({})".format(author.get("id", "?"), author.get("username", "?")), "inline": False},
-        {"name": "Reason", "value": "- The reader could not read the job card ({})\n- Kind: {}".format(why[:140], kind), "inline": False},
+        {"name": "Reason", "value": reasons[:1000], "inline": False},
         {"name": "Image", "value": "{} x {} px, {} bytes".format(att.get("width"), att.get("height"), att.get("size")), "inline": False},
     ]
     if guild:
