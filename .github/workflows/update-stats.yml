@@ -43,6 +43,7 @@ jobs:
           UNB_TOKEN: ${{ secrets.UNB_TOKEN }}
           GUILD_ID: ${{ secrets.GUILD_ID }}
           ECONOMY_CHANNEL_ID: ${{ secrets.ECONOMY_CHANNEL_ID }}
+          DISCORD_REPORT_CHANNEL_ID: ${{ secrets.DISCORD_REPORT_CHANNEL_ID }}
         run: python update_stats.py
 
       - name: Save results
