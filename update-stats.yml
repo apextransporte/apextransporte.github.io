@@ -1,0 +1,69 @@
+name: Update stats
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-stats
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Tesseract
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr
+
+      - name: Install Python packages
+        run: |
+          pip install requests numpy pillow scipy pytesseract
+
+      - name: Run update_stats.py
+        timeout-minutes: 5
+        env:
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_STATS_CHANNEL_ID: ${{ secrets.DISCORD_STATS_CHANNEL_ID }}
+          DISCORD_OUTPUT_CHANNEL_ID: ${{ secrets.DISCORD_OUTPUT_CHANNEL_ID }}
+          UNB_TOKEN: ${{ secrets.UNB_TOKEN }}
+          GUILD_ID: ${{ secrets.GUILD_ID }}
+          ECONOMY_CHANNEL_ID: ${{ secrets.ECONOMY_CHANNEL_ID }}
+          DISCORD_REPORT_CHANNEL_ID: ${{ secrets.DISCORD_REPORT_CHANNEL_ID }}
+        run: python update_stats.py
+
+      - name: Save results
+        if: always()
+        run: |
+          git config user.name "apex-bot"
+          git config user.email "apex-bot@users.noreply.github.com"
+          git add -A -- '*.json'
+          if git diff --cached --quiet; then
+            echo "Nothing to save"
+            exit 0
+          fi
+          git commit -m "Update stats"
+          for i in 1 2 3; do
+            if git pull --rebase -X theirs origin main && git push origin HEAD:main; then
+              echo "Saved on try $i"
+              exit 0
+            fi
+            git rebase --abort || true
+            sleep 5
+          done
+          echo "Could not save after 3 tries"
+          exit 1

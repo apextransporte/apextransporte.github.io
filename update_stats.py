@@ -1241,14 +1241,14 @@ def post_new_jobs(jobs, plan, messages):
 
 def report_failure(msg, att, kind, why, tries):
     """Posts one report in the reports channel when an image fails for the last time.
-    Needs DISCORD_REPORT_CHANNEL_ID in the workflow. Without it, nothing is posted."""
+    Needs DISCORD_REPORT_CHANNEL_ID in the workflow, GUILD_ID adds the link. Without it, nothing is posted."""
     channel = os.environ.get("DISCORD_REPORT_CHANNEL_ID", "")
     token = os.environ.get("DISCORD_BOT_TOKEN", "")
     if not channel or not token:
         print("Failure report skipped, DISCORD_REPORT_CHANNEL_ID is not set")
         return
     author = msg.get("author", {})
-    guild = os.environ.get("DISCORD_GUILD_ID", "")
+    guild = os.environ.get("GUILD_ID", "")
     fields = [
         {"name": "Driver", "value": "<@{}> ({})".format(author.get("id", "?"), author.get("username", "?")), "inline": False},
         {"name": "Reason", "value": "- The reader could not read the job card ({})\n- Kind: {}".format(why[:140], kind), "inline": False},
