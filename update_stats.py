@@ -1239,6 +1239,36 @@ def post_new_jobs(jobs, plan, messages):
     print("Job cards posted:", sent, "| failed:", failures, "| skipped:", skipped)
 
 
+def report_failure(msg, att, kind, why, tries):
+    """Posts one report in the reports channel when an image fails for the last time.
+    Needs DISCORD_REPORT_CHANNEL_ID in the workflow. Without it, nothing is posted."""
+    channel = os.environ.get("DISCORD_REPORT_CHANNEL_ID", "")
+    token = os.environ.get("DISCORD_BOT_TOKEN", "")
+    if not channel or not token:
+        print("Failure report skipped, DISCORD_REPORT_CHANNEL_ID is not set")
+        return
+    author = msg.get("author", {})
+    guild = os.environ.get("DISCORD_GUILD_ID", "")
+    fields = [
+        {"name": "Driver", "value": "<@{}> ({})".format(author.get("id", "?"), author.get("username", "?")), "inline": False},
+        {"name": "Reason", "value": "- The reader could not read the job card ({})\n- Kind: {}".format(why[:140], kind), "inline": False},
+        {"name": "Image", "value": "{} x {} px, {} bytes".format(att.get("width"), att.get("height"), att.get("size")), "inline": False},
+    ]
+    if guild:
+        fields.append({"name": "Link", "value": "https://discord.com/channels/{}/{}/{}".format(
+            guild, os.environ.get("DISCORD_STATS_CHANNEL_ID", ""), msg["id"]), "inline": False})
+    embed = {"title": "Job screenshot not counted: reader failed", "color": 0xC8102E,
+             "fields": fields, "image": {"url": att.get("url", "")}}
+    try:
+        r = requests.post(API + "/channels/" + channel + "/messages",
+                          headers={"Authorization": "Bot " + token},
+                          json={"embeds": [embed]}, timeout=30)
+        if r.status_code not in (200, 201):
+            print("Failure report failed", r.status_code, r.text[:200])
+    except Exception as e:
+        print("Failure report error", repr(e))
+
+
 def note_failure(failed, job_id, kind, why, att, msg):
     """FIX: remember an image that could not be read, so it stops eating the time budget every run."""
     old = failed.get(job_id, {})
@@ -1254,6 +1284,8 @@ def note_failure(failed, job_id, kind, why, att, msg):
         "size": att.get("size"),
         "posted": msg.get("timestamp", ""),
     }
+    if failed[job_id]["tries"] == MAX_FAILS:   # the last try, so the report goes out once
+        report_failure(msg, att, kind, why, failed[job_id]["tries"])
 
 
 def skip_failed(failed, job_id):
