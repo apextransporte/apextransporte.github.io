@@ -292,6 +292,17 @@ footer a{margin-right:18px}
 nav ul{min-height:28px}
 .slip .top h1{min-height:.9em}
 </style>
+<style>
+.lang-switch{position:relative;display:inline-block}
+.lang-btn{background:transparent;color:#fff;font:inherit;font-size:15px;cursor:pointer;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 10px}
+.lang-btn:hover,.lang-btn:focus-visible{border-color:#e10600;outline:none}
+.lang-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:1000;padding:6px;min-width:190px;max-height:320px;overflow-y:auto;background:#111;border:1px solid #e10600;border-radius:8px}
+.lang-menu[hidden]{display:none}
+.lang-item{padding:8px 10px;cursor:pointer;border-radius:4px;color:#fff;font-size:15px}
+.lang-item:hover,.lang-item:focus-visible,.lang-item[aria-selected="true"]{background:#e10600;outline:none}
+.goog-te-banner-frame,.skiptranslate iframe,#goog-gt-tt,.goog-te-balloon-frame{display:none!important}
+body{top:0!important}
+</style>
 </head>
 <body>
 <header>
@@ -311,6 +322,10 @@ nav ul{min-height:28px}
       <li><a href="#join">Join</a></li>
       <li><a href="#faq">FAQ</a></li>
       <li><a href="#events">Events</a></li>
+      <li class="lang-switch notranslate" translate="no">
+        <button type="button" class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Choose language"><span aria-hidden="true">&#127760;</span> <span id="langCode">EN</span></button>
+        <div class="lang-menu" id="langMenu" role="listbox" hidden></div>
+      </li>
       <li><a class="btn red" href="#join">Apply</a></li>
     </ul></nav>
   </div>
@@ -746,6 +761,54 @@ dl.notes dd{margin:0;font-weight:600;text-align:right}
       board.insertBefore(row, board.firstChild);
     });
   } catch (e) {}
+})();
+</script>
+<div id="google_translate_element" style="display:none"></div>
+<script>
+(function () {
+  var LANGS = [["tr","Türkçe"],["en","English"],["ar","العربية"],["sw","Kiswahili"],["lg","Luganda"],["de","Deutsch"],["fr","Français"],["es","Español"],["pt","Português"],["it","Italiano"],["nl","Nederlands"],["pl","Polski"],["ro","Română"],["ru","Русский"],["uk","Українська"],["bg","Български"],["el","Ελληνικά"],["hu","Magyar"],["cs","Čeština"],["sv","Svenska"],["az","Azərbaycanca"],["fa","فارسی"],["ur","اردو"],["hi","हिन्दी"],["bn","বাংলা"],["id","Bahasa Indonesia"],["ms","Bahasa Melayu"],["th","ไทย"],["vi","Tiếng Việt"],["zh-CN","中文"],["ja","日本語"],["ko","한국어"]];
+  var btn = document.getElementById("langBtn");
+  var menu = document.getElementById("langMenu");
+  var codeEl = document.getElementById("langCode");
+  function current(){ try { return localStorage.getItem("lang") || "en"; } catch (e) { return "en"; } }
+  function save(c){ try { localStorage.setItem("lang", c); } catch (e) {} }
+  function setCookie(c){
+    var h = location.hostname, past = "expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+    if (c === "en") {
+      document.cookie = "googtrans=;" + past + "path=/";
+      document.cookie = "googtrans=;" + past + "path=/;domain=" + h;
+    } else {
+      document.cookie = "googtrans=/en/" + c + ";path=/";
+      document.cookie = "googtrans=/en/" + c + ";path=/;domain=" + h;
+    }
+  }
+  function choose(c){ save(c); setCookie(c); location.reload(); }
+  function toggle(o){ menu.hidden = !o; btn.setAttribute("aria-expanded", o ? "true" : "false"); }
+  var now = current();
+  codeEl.textContent = now.split("-")[0].toUpperCase();
+  LANGS.forEach(function (l) {
+    var d = document.createElement("div");
+    d.className = "lang-item";
+    d.textContent = l[1];
+    d.setAttribute("role", "option");
+    d.setAttribute("tabindex", "0");
+    d.setAttribute("lang", l[0]);
+    if (l[0] === now) d.setAttribute("aria-selected", "true");
+    d.addEventListener("click", function () { choose(l[0]); });
+    d.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choose(l[0]); } });
+    menu.appendChild(d);
+  });
+  btn.addEventListener("click", function (e) { e.stopPropagation(); toggle(menu.hidden); });
+  document.addEventListener("click", function () { toggle(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") toggle(false); });
+  if (now !== "en") setCookie(now);
+  window.googleTranslateElementInit = function () {
+    new google.translate.TranslateElement({ pageLanguage: "en", autoDisplay: false }, "google_translate_element");
+  };
+  var s = document.createElement("script");
+  s.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+  s.async = true;
+  document.body.appendChild(s);
 })();
 </script>
 </body>
