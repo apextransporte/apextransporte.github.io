@@ -1,5 +1,6 @@
 import json
 import re
+import unicodedata
 from datetime import datetime
 
 
@@ -17,7 +18,9 @@ def norm(name):
     """Lower case, no spaces around names, no Apex tag in front and no ! mark in front.
     Apex|phantom, Apex | Phantom and PHANTOM all become phantom.
     !Yoshi, !yoshi and Yoshi all become yoshi."""
-    text = str(name or "").strip().lower()
+    text = unicodedata.normalize("NFKC", str(name or "")).strip().lower()
+    text = re.sub(r"[\u2022\u00b7\u2219\u30fb]", "", text)
+    text = re.sub(r"^apex\s+", "", text)
     text = re.sub(r"^\s*apex\s*[|\u2223\uff5c/]\s*", "", text)
     text = re.sub(r"^[!\s]+", "", text)
     return re.sub(r"\s+", " ", text).strip()
