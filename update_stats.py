@@ -824,6 +824,7 @@ START_NET_WORTH = {
     "kwameazum": {"amount": 7782, "since": "2026-11-10T00:55:00+03:00"},
     "mcmuffin": {"amount": 26223, "since": "2026-11-10T11:20:00+03:00"},
     "chickenmcmuffin": {"amount": 26223, "since": "2026-11-10T11:20:00+03:00"},
+    "astroveil": {"amount": 2308757, "since": "2026-11-10T21:45:00+03:00"},
 }
 
 
