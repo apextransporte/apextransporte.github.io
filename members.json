@@ -1,6 +1,6 @@
 {
   "member_count": 50,
-  "visitor_count": 24,
+  "visitor_count": 25,
   "members": [
     {
       "id": "883723046320484362",
@@ -588,6 +588,15 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/1518425652481495051/0b1d1f3b8cc73c41f076645f8d1c070c.png?size=128",
       "joined": "2026-11-05T20:48:58.332000+00:00"
+    },
+    {
+      "id": "1560273121645166792",
+      "name": "Mesa",
+      "username": "mesa___10",
+      "global_name": "Mesa",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1560273121645166792/4c70b22d7f222d35d1e83426b9d5e8da.png?size=128",
+      "joined": "2026-11-10T14:59:20.139000+00:00"
     },
     {
       "id": "1276846780016758835",
