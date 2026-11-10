@@ -25,14 +25,20 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-update-stats-v1
+
       - name: Install Tesseract
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y tesseract-ocr
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: tesseract-ocr
+          version: 1.0
 
       - name: Install Python packages
-        run: |
-          pip install requests numpy pillow scipy pytesseract
+        run: pip install requests numpy pillow scipy pytesseract
 
       - name: Run update_stats.py
         timeout-minutes: 5
