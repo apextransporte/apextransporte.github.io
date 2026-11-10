@@ -389,6 +389,34 @@ def read_income(mn, box, km):
     return 0
 
 
+def read_km(mn, box, minutes):
+    """FIX: when the first distance read gives an impossible speed, a leading digit was probably cut off.
+    Read the distance again with three crop sizes and keep only values with a believable speed.
+    Returns 0 when nothing fits, and the old value then stays."""
+    x1, y1, x2, y2 = [int(v) for v in box]
+    w, h = x2 - x1, y2 - y1
+    crops = [
+        mn[y1 + int(0.06 * h): y2 - int(0.06 * h), x1 + int(0.08 * w): x2 - int(0.08 * w)],
+        mn[y1 + int(0.03 * h): y2 - int(0.03 * h), x1 + int(0.03 * w): x2 - int(0.03 * w)],
+        mn[y1: y2, x1: x2],
+    ]
+
+    def fits(text):
+        value = parse_km(text)
+        if value and 15 <= speed(value, minutes) <= MAX_SPEED and value <= 3000:
+            return value
+        return None
+
+    for config in ("--psm 7", "--psm 7 -c tessedit_char_whitelist=0123456789Km "):
+        for crop in crops:
+            if crop.size == 0:
+                continue
+            value = vote(crop, fits, config=config)
+            if value:
+                return value
+    return 0
+
+
 def read_penalty(arr, box):
     """Red penalty text is read from two colour channels and several settings, then voted."""
     x1, y1, x2, y2 = [int(v) for v in box]
@@ -626,6 +654,12 @@ def parse_job(image_bytes):
     print("OCR:", {"km": km, "minutes": minutes, "layout_found": layout["found"]})
     if km is None or minutes is None:
         return None
+    # FIX: a speed under 15 km/h means the distance lost a digit, so it is read again with wider crops
+    if not 15 <= speed(km, minutes) <= MAX_SPEED:
+        better = read_km(mn, b["distance"], minutes)
+        print("Distance re-read:", km, "->", better or "no better value")
+        if better:
+            km = better
 
     job = {"km": km, "minutes": minutes, "income": 0}
     # FAST: income, fuel, both penalties and the level are read side by side
@@ -824,7 +858,6 @@ START_NET_WORTH = {
     "kwameazum": {"amount": 7782, "since": "2026-11-10T00:55:00+03:00"},
     "mcmuffin": {"amount": 26223, "since": "2026-11-10T11:20:00+03:00"},
     "chickenmcmuffin": {"amount": 26223, "since": "2026-11-10T11:20:00+03:00"},
-    "astroveil": {"amount": 2308757, "since": "2026-11-10T21:45:00+03:00"},
 }
 
 
@@ -1168,6 +1201,42 @@ def card_date(ts):
         return ts
 
 
+HELD_ALERT_CHANNEL_ID = os.environ.get("DISCORD_HELD_ALERT_CHANNEL_ID") or "1409254415671623841"
+
+
+def alert_held(items):
+    """Posts one staff alert for each card that stays held after its last read.
+    Each job is alerted once, the ids are saved in alerted_held.json."""
+    token = os.environ.get("DISCORD_BOT_TOKEN", "")
+    if not items or not token or not HELD_ALERT_CHANNEL_ID:
+        return
+    alerted = load_json("alerted_held.json", [])
+    guild = os.environ.get("GUILD_ID", "")
+    for item in items:
+        if item["id"] in alerted:
+            continue
+        link = ""
+        if guild:
+            link = "https://discord.com/channels/{}/{}/{}".format(
+                guild, os.environ.get("DISCORD_STATS_CHANNEL_ID", ""), item["id"].split("-")[0])
+        text = ("Job card not posted. The reader could not trust the numbers after the last read.\n"
+                "Driver: {} | Distance: {} km | Time: {} | Income: \u20ac{:,}\n{}\n"
+                "Fix the job by hand or ask the driver to post the original screenshot.").format(
+            item["driver"], item["km"], fmt_time(item.get("minutes") or 0), item["income"] or 0, link)
+        try:
+            r = requests.post(API + "/channels/" + HELD_ALERT_CHANNEL_ID + "/messages",
+                              headers={"Authorization": "Bot " + token},
+                              json={"content": text[:1900]}, timeout=30)
+            if r.status_code in (200, 201):
+                alerted.append(item["id"])
+            else:
+                print("Held alert failed", r.status_code, r.text[:200])
+        except Exception as e:
+            print("Held alert error", repr(e))
+    with open("alerted_held.json", "w", encoding="utf-8") as f:
+        json.dump(alerted, f)
+
+
 def post_new_jobs(jobs, plan, messages):
     """Posts each new accepted job to the output channel once, and logs why a job is skipped."""
     if not os.environ.get("DISCORD_OUTPUT_CHANNEL_ID"):
@@ -1205,7 +1274,9 @@ def post_new_jobs(jobs, plan, messages):
         # FIX: a card with an income outside the believable range is never posted, it waits for a better read
         if not income_fits(j.get("income", 0), j.get("km", 0)):
             skipped["held, income not trusted"] += 1
-            held.append({"id": j["id"], "driver": j["name"], "km": j.get("km"), "income": j.get("income")})
+            held.append({"id": j["id"], "driver": j["name"], "km": j.get("km"), "income": j.get("income"),
+                         "minutes": j.get("minutes"),
+                         "final": j.get("reads", 0) >= MAX_READS or j.get("income_tries", 0) >= 3})
             continue
         # FIX: a level copied from an older job is a guess, so the card waits until the screenshot is read again
         if j.get("level_est") and j.get("level_tries", 0) < LEVEL_RETRIES:
@@ -1244,6 +1315,7 @@ def post_new_jobs(jobs, plan, messages):
         json.dump(posted, f)
     with open("held_cards.json", "w", encoding="utf-8") as f:   # FIX: staff see which cards wait for a correction
         json.dump(held, f, ensure_ascii=False, indent=1)
+    alert_held([h for h in held if h.get("final")])   # FIX: staff hear about a card that stays held after its last read
     print("Job cards posted:", sent, "| failed:", failures, "| skipped:", skipped)
 
 
