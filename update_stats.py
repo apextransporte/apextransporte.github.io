@@ -846,6 +846,9 @@ def apply_start_net_worth(net_worth, jobs):
                 total += j["income"]
         for name in names:
             net_worth[name] = total
+            print("Net worth rule set:", name, "=", total)
+        if not names:
+            print("Net worth rule found no job for:", key)
 
 
 # Fixed amounts added on top of a driver's net worth on every run.
