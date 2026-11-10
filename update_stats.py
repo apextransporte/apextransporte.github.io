@@ -822,6 +822,8 @@ START_NET_WORTH = {
     "mrx": {"amount": 1327955, "since": "2026-11-06T14:56:00+03:00"},
     "mrslimea": {"amount": 129210, "since": "2026-11-09T20:52:00+03:00"},
     "kwameazum": {"amount": 7782, "since": "2026-11-10T00:55:00+03:00"},
+    "mcmuffin": {"amount": 26223, "since": "2026-11-10T11:20:00+03:00"},
+    "chickenmcmuffin": {"amount": 26223, "since": "2026-11-10T11:20:00+03:00"},
 }
 
 
