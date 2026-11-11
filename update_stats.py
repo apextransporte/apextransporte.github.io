@@ -20,7 +20,7 @@ from PIL import Image, ImageOps
 from scipy import ndimage
 import pytesseract
 
-from net_worth import estimate_net_worth, find_net_worth, fmt_money
+from net_worth import estimate_net_worth, find_net_worth, fmt_money, load_base, norm, parse_date
 from post_joblog import send_joblog, fetch_recent_cards, card_value, edit_card_level
 import economy
 
@@ -389,34 +389,6 @@ def read_income(mn, box, km):
     return 0
 
 
-def read_km(mn, box, minutes):
-    """FIX: when the first distance read gives an impossible speed, a leading digit was probably cut off.
-    Read the distance again with three crop sizes and keep only values with a believable speed.
-    Returns 0 when nothing fits, and the old value then stays."""
-    x1, y1, x2, y2 = [int(v) for v in box]
-    w, h = x2 - x1, y2 - y1
-    crops = [
-        mn[y1 + int(0.06 * h): y2 - int(0.06 * h), x1 + int(0.08 * w): x2 - int(0.08 * w)],
-        mn[y1 + int(0.03 * h): y2 - int(0.03 * h), x1 + int(0.03 * w): x2 - int(0.03 * w)],
-        mn[y1: y2, x1: x2],
-    ]
-
-    def fits(text):
-        value = parse_km(text)
-        if value and 15 <= speed(value, minutes) <= MAX_SPEED and value <= 3000:
-            return value
-        return None
-
-    for config in ("--psm 7", "--psm 7 -c tessedit_char_whitelist=0123456789Km "):
-        for crop in crops:
-            if crop.size == 0:
-                continue
-            value = vote(crop, fits, config=config)
-            if value:
-                return value
-    return 0
-
-
 def read_penalty(arr, box):
     """Red penalty text is read from two colour channels and several settings, then voted."""
     x1, y1, x2, y2 = [int(v) for v in box]
@@ -654,12 +626,6 @@ def parse_job(image_bytes):
     print("OCR:", {"km": km, "minutes": minutes, "layout_found": layout["found"]})
     if km is None or minutes is None:
         return None
-    # FIX: a speed under 15 km/h means the distance lost a digit, so it is read again with wider crops
-    if not 15 <= speed(km, minutes) <= MAX_SPEED:
-        better = read_km(mn, b["distance"], minutes)
-        print("Distance re-read:", km, "->", better or "no better value")
-        if better:
-            km = better
 
     job = {"km": km, "minutes": minutes, "income": 0}
     # FAST: income, fuel, both penalties and the level are read side by side
@@ -851,22 +817,44 @@ def distance_extra(name):
 
 # Drivers who start with a fixed net worth. The amount counts from the "since" time.
 # Every job income posted after that time is added to it automatically.
-START_NET_WORTH = {
-    "yusuf": {"amount": 16222, "since": "2026-10-27T14:27:00+03:00"},
-    "mrx": {"amount": 1327955, "since": "2026-11-06T14:56:00+03:00"},
-    "mrslimea": {"amount": 129210, "since": "2026-11-09T20:52:00+03:00"},
-    "kwameazum": {"amount": 7782, "since": "2026-11-10T00:55:00+03:00"},
-    "mcmuffin": {"amount": 26223, "since": "2026-11-10T11:20:00+03:00"},
-    "chickenmcmuffin": {"amount": 26223, "since": "2026-11-10T11:20:00+03:00"},
-    "astroveil": {"amount": 2308757, "since": "2026-11-11T10:42:00+03:00"},
-}
+START_NET_WORTH = {}  # filled from net_worth_rules.json by merge_rules_file() below
+
+
+def parse_since(value):
+    """Reads a start time such as 2026-11-11T19:30:00+03:00, 2026-11-11 19:30 or 2026-11-11.
+    A time without a time zone counts as Uganda time (+03:00)."""
+    when = datetime.fromisoformat(str(value).strip().replace(" ", "T", 1))
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=timezone(timedelta(hours=3)))
+    return when
+
+
+def merge_rules_file():
+    """Adds the drivers typed in net_worth_rules.json to START_NET_WORTH.
+    Format: {"Driver name": {"amount": 12345, "since": "2026-11-11 19:30"}}
+    The name can be written any way: Apex tag, capitals and symbols are ignored."""
+    rules = load_json("net_worth_rules.json", {})
+    if not isinstance(rules, dict):
+        return
+    for label, rule in rules.items():
+        try:
+            key = clean_name(unicodedata.normalize("NFKC", str(label)))
+            amount = float(rule["amount"])
+            parse_since(rule["since"])
+            if key:
+                START_NET_WORTH[key] = {"amount": amount, "since": rule["since"]}
+        except Exception as error:
+            print("Bad rule in net_worth_rules.json:", label, error)
+
+
+merge_rules_file()
 
 
 def apply_start_net_worth(net_worth, jobs):
     """Sets the net worth of each driver in START_NET_WORTH to the start amount
     plus the income of every job posted after the start time."""
     for key, rule in START_NET_WORTH.items():
-        since = datetime.fromisoformat(rule["since"])
+        since = parse_since(rule["since"])
         total = rule["amount"]
         names = set()
         for j in jobs:
@@ -884,6 +872,41 @@ def apply_start_net_worth(net_worth, jobs):
             print("Net worth rule set:", name, "=", total)
         if not names:
             print("Net worth rule found no job for:", key)
+
+
+def sync_base_with_rules(jobs, path="net_worth_base.json"):
+    """Writes every ruled driver into net_worth_base.json, so net_worth.json and the website
+    show the same net worth as the bot and the driver never disappears.
+    The base is set so that base + every job income after the base date = amount + jobs after the start time."""
+    try:
+        base_date, base = load_base(path)
+        start = parse_date(base_date)
+        changed = False
+        for key, rule in START_NET_WORTH.items():
+            since = parse_since(rule["since"])
+            names = {j["name"] for j in jobs if name_matches(j["name"], [key])}
+            for name in names:
+                spent = 0
+                for j in jobs:
+                    if norm(j["name"]) != norm(name):
+                        continue
+                    try:
+                        when = datetime.fromisoformat(j.get("ts", ""))
+                        if parse_date(j["ts"]) > start and when <= since:
+                            spent += j["income"]
+                    except (ValueError, KeyError):
+                        continue
+                target = max(0, round(rule["amount"] - spent))
+                existing = next((k for k in base if norm(k) == norm(name)), name)
+                if base.get(existing) != target:
+                    base[existing] = target
+                    changed = True
+        if changed:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump({"base_date": base_date, "base": base}, f, ensure_ascii=False)
+            print("net_worth_base.json updated with the net worth rules")
+    except Exception as error:
+        print("Could not sync net_worth_base.json:", repr(error))
 
 
 # Fixed amounts added on top of a driver's net worth on every run.
@@ -1202,42 +1225,6 @@ def card_date(ts):
         return ts
 
 
-HELD_ALERT_CHANNEL_ID = os.environ.get("DISCORD_HELD_ALERT_CHANNEL_ID") or "1409254415671623841"
-
-
-def alert_held(items):
-    """Posts one staff alert for each card that stays held after its last read.
-    Each job is alerted once, the ids are saved in alerted_held.json."""
-    token = os.environ.get("DISCORD_BOT_TOKEN", "")
-    if not items or not token or not HELD_ALERT_CHANNEL_ID:
-        return
-    alerted = load_json("alerted_held.json", [])
-    guild = os.environ.get("GUILD_ID", "")
-    for item in items:
-        if item["id"] in alerted:
-            continue
-        link = ""
-        if guild:
-            link = "https://discord.com/channels/{}/{}/{}".format(
-                guild, os.environ.get("DISCORD_STATS_CHANNEL_ID", ""), item["id"].split("-")[0])
-        text = ("Job card not posted. The reader could not trust the numbers after the last read.\n"
-                "Driver: {} | Distance: {} km | Time: {} | Income: \u20ac{:,}\n{}\n"
-                "Fix the job by hand or ask the driver to post the original screenshot.").format(
-            item["driver"], item["km"], fmt_time(item.get("minutes") or 0), item["income"] or 0, link)
-        try:
-            r = requests.post(API + "/channels/" + HELD_ALERT_CHANNEL_ID + "/messages",
-                              headers={"Authorization": "Bot " + token},
-                              json={"content": text[:1900]}, timeout=30)
-            if r.status_code in (200, 201):
-                alerted.append(item["id"])
-            else:
-                print("Held alert failed", r.status_code, r.text[:200])
-        except Exception as e:
-            print("Held alert error", repr(e))
-    with open("alerted_held.json", "w", encoding="utf-8") as f:
-        json.dump(alerted, f)
-
-
 def post_new_jobs(jobs, plan, messages):
     """Posts each new accepted job to the output channel once, and logs why a job is skipped."""
     if not os.environ.get("DISCORD_OUTPUT_CHANNEL_ID"):
@@ -1275,9 +1262,7 @@ def post_new_jobs(jobs, plan, messages):
         # FIX: a card with an income outside the believable range is never posted, it waits for a better read
         if not income_fits(j.get("income", 0), j.get("km", 0)):
             skipped["held, income not trusted"] += 1
-            held.append({"id": j["id"], "driver": j["name"], "km": j.get("km"), "income": j.get("income"),
-                         "minutes": j.get("minutes"),
-                         "final": j.get("reads", 0) >= MAX_READS or j.get("income_tries", 0) >= 3})
+            held.append({"id": j["id"], "driver": j["name"], "km": j.get("km"), "income": j.get("income")})
             continue
         # FIX: a level copied from an older job is a guess, so the card waits until the screenshot is read again
         if j.get("level_est") and j.get("level_tries", 0) < LEVEL_RETRIES:
@@ -1316,7 +1301,6 @@ def post_new_jobs(jobs, plan, messages):
         json.dump(posted, f)
     with open("held_cards.json", "w", encoding="utf-8") as f:   # FIX: staff see which cards wait for a correction
         json.dump(held, f, ensure_ascii=False, indent=1)
-    alert_held([h for h in held if h.get("final")])   # FIX: staff hear about a card that stays held after its last read
     print("Job cards posted:", sent, "| failed:", failures, "| skipped:", skipped)
 
 
@@ -1596,6 +1580,7 @@ def main():
 
     # Net worth starts from the saved base values and grows with every new job income
     job_rows = [{"driver": j["name"], "date": j.get("ts", ""), "income": j["income"]} for j in jobs]
+    sync_base_with_rules(jobs)
     net_worth = estimate_net_worth(job_rows)
     manual_net_worth = load_json("net_worth_manual.json", {})
     manual_levels = load_json("levels_manual.json", {})
