@@ -1,6 +1,6 @@
 {
-  "member_count": 50,
-  "visitor_count": 25,
+  "member_count": 52,
+  "visitor_count": 24,
   "members": [
     {
       "id": "883723046320484362",
@@ -64,6 +64,15 @@
       "nick": "Apex Mechanic STAR",
       "avatar": "https://cdn.discordapp.com/avatars/1299708702739398750/d6f560ca0b7794b90ee4e77cacd73673.png?size=128",
       "joined": "2025-08-29T23:18:28.016000+00:00"
+    },
+    {
+      "id": "1560273121645166792",
+      "name": "Apex Mesa",
+      "username": "mesa___10",
+      "global_name": "Mesa",
+      "nick": "Apex Mesa",
+      "avatar": "https://cdn.discordapp.com/avatars/1560273121645166792/4c70b22d7f222d35d1e83426b9d5e8da.png?size=128",
+      "joined": "2026-11-10T14:59:20.139000+00:00"
     },
     {
       "id": "1125513287681978492",
@@ -345,6 +354,15 @@
       "joined": "2026-06-11T18:54:33.048000+00:00"
     },
     {
+      "id": "987835664932425728",
+      "name": "Apex |🤠| SIROCCO |🤠|",
+      "username": "sirocco0501",
+      "global_name": "|🤠| SIROCCO |🤠|",
+      "nick": "Apex |🤠| SIROCCO |🤠|",
+      "avatar": "https://cdn.discordapp.com/avatars/987835664932425728/6d77d7af5d11df0a30137869024c323b.png?size=128",
+      "joined": "2026-11-11T18:01:31.476000+00:00"
+    },
+    {
       "id": "1288642064078078075",
       "name": "APEX 𝓜𝓻 •𝓢𝓵𝓲𝓶𝓮 •𝓐 ✪ 🇩🇪",
       "username": "de_realone_agyei",
@@ -588,15 +606,6 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/1518425652481495051/0b1d1f3b8cc73c41f076645f8d1c070c.png?size=128",
       "joined": "2026-11-05T20:48:58.332000+00:00"
-    },
-    {
-      "id": "1560273121645166792",
-      "name": "Mesa",
-      "username": "mesa___10",
-      "global_name": "Mesa",
-      "nick": null,
-      "avatar": "https://cdn.discordapp.com/avatars/1560273121645166792/4c70b22d7f222d35d1e83426b9d5e8da.png?size=128",
-      "joined": "2026-11-10T14:59:20.139000+00:00"
     },
     {
       "id": "1276846780016758835",
