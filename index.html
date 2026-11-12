@@ -299,6 +299,7 @@ nav ul{min-height:28px}
     <a class="logo" href="#top"><img width="77" height="96" class="mark" src="logo.webp" decoding="async" alt="Apex Transporte logo"><span>Apex Transporte</span></a>
     <nav aria-label="Main"><ul>
       <li><a href="#about">About</a></li>
+      <li><a href="#news">News</a></li>
       <li><a href="#stats">Stats</a></li>
       <li><a href="#jobs">Jobs</a></li>
       <li><a href="#leaderboard">Leaderboard</a></li>
@@ -352,6 +353,12 @@ nav ul{min-height:28px}
     </dl>
   </div>
 </section>
+
+  <section id="news"><div class="wrap">
+    <h2>News</h2>
+    <p class="sub">The latest from Apex Transporte.</p>
+    <div class="nlist" id="newsList" aria-live="polite"><p class="nempty">Loading the news.</p></div>
+  </div></section>
 
   <section id="stats"><div class="wrap">
     <h2>Our numbers</h2>
@@ -746,6 +753,62 @@ dl.notes dd{margin:0;font-weight:600;text-align:right}
       board.insertBefore(row, board.firstChild);
     });
   } catch (e) {}
+})();
+</script>
+<style>
+#news .nlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+#news .ncard{background:var(--paper);border:3px solid var(--edge);padding:18px 20px;display:flex;flex-direction:column;gap:8px;transition:transform .15s ease,box-shadow .15s ease}
+#news .ncard:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--red)}
+#news .ncard.new{border-color:var(--red)}
+#news .nmeta{display:flex;align-items:center;gap:10px;font-family:var(--head);font-weight:800;font-size:18px;letter-spacing:.04em;color:#ff4a4a}
+#news .ntag{background:var(--red);color:#fff;padding:1px 10px;font-size:15px}
+#news .ncard h3{font-family:var(--head);font-size:28px;line-height:1.1;margin:0}
+#news .ncard p{margin:0;color:#c4c4c4;font-size:16px}
+#news .ncard .dlink{margin-top:auto}
+#news .nempty{color:var(--muted)}
+@media (prefers-reduced-motion:reduce){#news .ncard{transition:none}#news .ncard:hover{transform:none;box-shadow:none}}
+</style>
+<script>
+(async function () {
+  var box = document.getElementById("newsList");
+  if (!box) return;
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  }
+  try {
+    var res = await fetch("news.json?t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("bad response");
+    var items = await res.json();
+    items = items.filter(function (i) { return i && i.title; });
+    items.sort(function (a, b) { return String(b.date || "").localeCompare(String(a.date || "")); });
+    box.textContent = "";
+    if (!items.length) { box.appendChild(el("p", "nempty", "No news yet. Check Discord for updates.")); return; }
+    var now = Date.now();
+    items.forEach(function (i) {
+      var card = el("article", "ncard");
+      var meta = el("div", "nmeta");
+      var d = i.date ? new Date(i.date + "T00:00:00") : null;
+      if (d && !isNaN(d)) {
+        meta.appendChild(el("span", "", d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })));
+        if (now - d.getTime() < 7 * 86400000) { card.classList.add("new"); meta.appendChild(el("span", "ntag", "New")); }
+      }
+      card.appendChild(meta);
+      card.appendChild(el("h3", "", i.title));
+      if (i.text) card.appendChild(el("p", "", i.text));
+      if (i.link && /^https?:\/\//.test(i.link)) {
+        var a = el("a", "dlink", i.linkText || "Read more");
+        a.href = i.link; a.target = "_blank"; a.rel = "noopener";
+        card.appendChild(a);
+      }
+      box.appendChild(card);
+    });
+  } catch (e) {
+    box.textContent = "";
+    box.appendChild(el("p", "nempty", "News is not available right now. Check Discord for updates."));
+  }
 })();
 </script>
 </body>
