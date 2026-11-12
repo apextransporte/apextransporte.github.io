@@ -253,7 +253,7 @@ const APEX_FEED_URL = "";
       var members = Array.isArray(d.members) ? d.members : [];
       var byName = {};
       var exact = {};
-      members.forEach(function (m) { byName[norm(m.name)] = m; exact[m.name] = m; });
+      members.forEach(function (m) { var nk = norm(m.name); if (nk && nk !== "apex") byName[nk] = m; exact[m.name] = m; });   // a styled name that leaves only "apex" or nothing is matched by Discord ID below
       var ALIASES = {
         "blaxthegamer092": "APEX | \u026Es\u2295Blaxthegamer",
         "rex": "REX \ud83c\uddf9\ud83c\uddf7",
@@ -263,12 +263,13 @@ const APEX_FEED_URL = "";
       };
       function find(name) {
         var n = norm(name);
+        if (!n || n === "apex") return null;   // styled letters leave no plain text to compare: the ID pass handles these drivers
         var al = ALIASES[norm2(name)];
         if (al && exact[al]) return exact[al];
         if (al && byName[norm(al)]) return byName[norm(al)];
         if (byName[n]) return byName[n];
         if (n.length < 4) return null;
-        for (var k in byName) { if (k.length >= 4 && (k.indexOf(n) > -1 || n.indexOf(k) > -1)) return byName[k]; }
+        for (var k in byName) { if (k.length >= 4 && k !== "apex" && (k.indexOf(n) > -1 || n.indexOf(k) > -1)) return byName[k]; }
         return null;
       }
       var known = {};
