@@ -1,15 +1,22 @@
 {
  "messages_loaded": 200,
- "newest_message": "2026-11-12T07:47:39.114000+00:00",
- "newest_saved_job": "2026-11-12T07:41:46.255000+00:00",
+ "newest_message": "2026-11-12T09:26:06.186000+00:00",
+ "newest_saved_job": "2026-11-12T09:26:06.186000+00:00",
  "time_limit_hit": false,
- "images_waiting": 1,
+ "images_waiting": 0,
  "images_failed": 13,
  "newest_images": [
   {
-   "posted": "2026-11-12T07:47:39.114000+00:00",
-   "status": "failed nojob x1",
-   "file": "Truckers_of_Europe_3_2026-11-12-10-46-27.jpg",
+   "posted": "2026-11-12T09:26:06.186000+00:00",
+   "status": "saved",
+   "file": "Truckers_of_Europe_3_2026-11-12-11-59-44.jpg",
+   "w": 1600,
+   "h": 720
+  },
+  {
+   "posted": "2026-11-12T09:25:51.843000+00:00",
+   "status": "saved",
+   "file": "Truckers_of_Europe_3_2026-11-12-11-31-46.jpg",
    "w": 1600,
    "h": 720
   },
@@ -53,13 +60,6 @@
    "status": "saved",
    "file": "Screenshot_20261111-092841_Truckers_of_Europe_3.jpg",
    "w": 1480,
-   "h": 720
-  },
-  {
-   "posted": "2026-11-12T00:53:00.694000+00:00",
-   "status": "saved",
-   "file": "Double_Cargo.jpg",
-   "w": 1600,
    "h": 720
   }
  ]
