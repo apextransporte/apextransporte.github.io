@@ -733,6 +733,7 @@ def fmt_time(minutes):
 MAX_PENALTY = 30000      # a damage or time penalty above this is a misread, so it never enters the ranks
 MIN_RANKED_JOBS = 5      # a driver needs this many read jobs to enter the clean rank
 RANK_SIZE = 10
+WORSTEST_SIZE = 100      # the Worstest driver card pages through every driver
 
 
 def job_penalties(j):
@@ -790,7 +791,27 @@ def build_rankings(jobs, table):
     for r in worst:
         r.pop("_sort")
 
-    return {"level": level_rank[:RANK_SIZE], "clean": clean_rank[:RANK_SIZE], "worst": worst[:RANK_SIZE]}
+    # 4. Worstest driver: damage and time penalties added up over every job of a driver (whole company view)
+    costs = {}
+    for j in jobs:
+        pen = job_penalties(j)
+        if pen is None:
+            continue
+        c = costs.setdefault(j["author"], {"name": j["name"], "jobs": 0, "damage": 0, "time_penalty": 0})
+        c["name"] = j["name"]
+        c["jobs"] += 1
+        c["damage"] += pen[0]
+        c["time_penalty"] += pen[1]
+    worstest = []
+    for c in costs.values():
+        total = c["damage"] + c["time_penalty"]
+        if total > 0:
+            c["total"] = total
+            worstest.append(c)
+    worstest.sort(key=lambda r: r["total"], reverse=True)
+
+    return {"level": level_rank[:RANK_SIZE], "clean": clean_rank[:RANK_SIZE], "worst": worst[:RANK_SIZE],
+            "worstest": worstest[:WORSTEST_SIZE]}
 
 
 
@@ -1667,7 +1688,7 @@ def main():
     data["daily"] = build_daily(jobs)
     # Stable Discord IDs. The bot and the website match drivers by ID, so a new name or emoji never loses the data.
     ids = {j["name"]: str(j["author"]) for j in jobs}
-    for section in ("level", "clean", "worst"):
+    for section in ("level", "clean", "worst", "worstest"):
         for row in data["rankings"].get(section, []):
             row["id"] = ids.get(row["name"], "")
     for day_rows in data["daily"].values():
