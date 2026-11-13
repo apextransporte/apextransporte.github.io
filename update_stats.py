@@ -797,9 +797,10 @@ def build_rankings(jobs, table):
         pen = job_penalties(j)
         if pen is None:
             continue
-        c = costs.setdefault(j["author"], {"name": j["name"], "jobs": 0, "damage": 0, "time_penalty": 0})
+        c = costs.setdefault(j["author"], {"name": j["name"], "jobs": 0, "income": 0, "damage": 0, "time_penalty": 0})
         c["name"] = j["name"]
         c["jobs"] += 1
+        c["income"] += j.get("income", 0) or 0
         c["damage"] += pen[0]
         c["time_penalty"] += pen[1]
     worstest = []
