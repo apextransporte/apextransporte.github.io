@@ -507,8 +507,16 @@ def read_level(gray, layout):
                 if best is None or cost < best[0]:
                     best = (cost, x, y)
     if best:
-        return best[1], best[2]
-    return b - 1, b  # the right number is the clearer one
+        x, y = best[1], best[2]
+    else:
+        x, y = b - 1, b  # the right number is the clearer one
+    # FIX: the game has no level above MAX_LEVEL. A stray mark in front of both numbers made 154 to 155
+    # read as 7154 to 7155, so the card waited for a level. Drop the extra leading digit when both agree.
+    if x > MAX_LEVEL and len(str(x)) >= 4 and len(str(y)) >= 4:
+        x2, y2 = int(str(x)[1:]), int(str(y)[1:])
+        if 0 < x2 <= MAX_LEVEL and y2 == x2 + 1:
+            return x2, y2
+    return x, y
 
 
 # ---------- sanity fixes ----------
@@ -1303,7 +1311,11 @@ def post_new_jobs(jobs, plan, messages):
                          "final": j.get("reads", 0) >= MAX_READS or j.get("income_tries", 0) >= 3})
             continue
         # FIX: a level copied from an older job is a guess, so the card waits until the screenshot is read again
-        if j.get("level_est") and j.get("level_tries", 0) < LEVEL_RETRIES:
+        # FIX: once the reader has given up on this job (MAX_READS reads), the card posts with the estimated level.
+        # Before, the card waited for level_tries to reach LEVEL_RETRIES, but level_tries never counts up
+        # when a level was read (even a wrong one), so the card waited forever. A later good read edits the level.
+        if (j.get("level_est") and j.get("level_tries", 0) < LEVEL_RETRIES
+                and j.get("reads", 0) < MAX_READS):
             skipped["waiting for level"] += 1
             continue
         card = {
