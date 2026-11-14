@@ -136,6 +136,42 @@ def unreact(message, emoji, token, channel):
     time.sleep(0.4)
 
 
+def report_repeat(msg, data):
+    """FIX: a repeated screenshot deleted by this script now gets a staff report in the reports channel,
+    the same as a repeat caught by the bot. Needs DISCORD_REPORT_CHANNEL_ID in the workflow."""
+    report_channel = os.environ.get("DISCORD_REPORT_CHANNEL_ID", "")
+    token = os.environ.get("DISCORD_BOT_TOKEN", "")
+    if not report_channel or not token:
+        print("Repeat report skipped, DISCORD_REPORT_CHANNEL_ID is not set")
+        return
+    author = msg.get("author", {})
+    embed = {
+        "title": "Job screenshot rejected: duplicate",
+        "color": 0xC8102E,
+        "fields": [
+            {"name": "Driver", "value": "<@{}> ({})".format(author.get("id", "?"), author.get("username", "?")), "inline": False},
+            {"name": "Channel", "value": "<#{}>".format(os.environ.get("DISCORD_STATS_CHANNEL_ID", "")), "inline": False},
+            {"name": "Reason", "value": "- Same job as an earlier post: same driver, distance, time and income\n- The repeat was deleted", "inline": False},
+        ],
+    }
+    headers = {"Authorization": "Bot " + token}
+    url = API + "/channels/" + report_channel + "/messages"
+    try:
+        if data:
+            embed["image"] = {"url": "attachment://rejected.png"}
+            r = requests.post(url, headers=headers, timeout=30,
+                              data={"payload_json": json.dumps({"embeds": [embed]})},
+                              files={"files[0]": ("rejected.png", data)})
+        else:
+            r = requests.post(url, headers=headers, json={"embeds": [embed]}, timeout=30)
+        if r.status_code not in (200, 201):
+            print("Repeat report failed", r.status_code, r.text[:200])
+        else:
+            print("Repeat report posted for", msg["id"])
+    except Exception as e:
+        print("Repeat report error", repr(e))
+
+
 def delete_message(message, token, channel):
     """Deletes one message. Returns False when the bot lacks Manage Messages, so the caller stops deleting."""
     url = API + "/channels/" + channel + "/messages/" + message["id"]
@@ -1587,8 +1623,18 @@ def main():
         # A repeated screenshot is removed. If Discord refuses, it keeps the red X instead.
         if (emoji == REACTION_NO and deleting and deleted < MAX_DELETES_PER_RUN
                 and is_repeat_message(msg, dup_job_ids)):
+            # FIX: the image is downloaded before the delete, because Discord drops the link after it
+            repeat_data = None
+            for att in msg.get("attachments", []):
+                if is_image(att):
+                    try:
+                        repeat_data = requests.get(att["url"], timeout=25).content
+                    except Exception:
+                        repeat_data = None
+                    break
             if delete_message(msg, token, channel):
                 deleted += 1
+                report_repeat(msg, repeat_data)
                 continue
             deleting = False
         if emoji == REACTION_OK:
