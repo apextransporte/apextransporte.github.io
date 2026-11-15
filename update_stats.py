@@ -44,6 +44,8 @@ API = "https://discord.com/api/v10"
 MAX_MESSAGES = 1500   # reads far back so older drivers get their first job found
 MAX_SECONDS = int(os.environ.get("MAX_SECONDS", "170"))   # FIX: the workflow step stops at 5 minutes, so the bot stops itself earlier and saves its progress
 SCHEMA = 5   # raised so every old screenshot is read again with the fixed rules
+# FIX: a heavy lowboy job burned 695 l over 366 km (1.9 l per km). The old limit of 1.2 cut it to 69 l.
+FUEL_MAX_PER_KM = 3.0
 MAX_SPEED = 600   # km per hour, the game allows fast average speeds
 MAX_LEVEL = 999   # the game has no level above this, anything higher is a misread
 LEVEL_DROP = 2    # a reading just below the earlier level is kept as the screenshot showed it
@@ -495,7 +497,7 @@ def fix_km(km, minutes, fuel=None, income=None):
     If fuel and income both agree with the distance, the time is the wrong value, so the distance stays."""
     if minutes and 15 <= speed(km, minutes) <= MAX_SPEED and km <= 3000:
         return km, False
-    if fuel and income and km <= 3000 and 0.15 <= fuel / km <= 1.2 and 4 <= income / km <= 120:
+    if fuel and income and km <= 3000 and 0.15 <= fuel / km <= FUEL_MAX_PER_KM and 4 <= income / km <= 120:
         return km, False
     s = str(km)
     cands = []
@@ -505,7 +507,7 @@ def fix_km(km, minutes, fuel=None, income=None):
     if not cands:
         return km, False
     if fuel:
-        both = [v for v in cands if 0.15 <= fuel / v <= 1.2]
+        both = [v for v in cands if 0.15 <= fuel / v <= FUEL_MAX_PER_KM]
         if both:
             return min(both, key=lambda v: abs(fuel / v - 0.5)), True
     return min(cands, key=lambda v: abs(speed(v, minutes) - 60)), True
@@ -522,17 +524,17 @@ def edits(n):
 
 
 def fix_fuel(fuel, km):
-    """A truck burns about 0.15 to 1.2 litres per km. Repair a bad reading or return None."""
+    """A truck burns about 0.15 to 3 litres per km. Heavy lowboy loads burn about 2. Repair a bad reading or return None."""
     if not km or fuel is None:
         return fuel
-    if 0.15 <= fuel / km <= 1.2:
+    if 0.15 <= fuel / km <= FUEL_MAX_PER_KM:
         return fuel
     # The game shows fuel like 28.9 or 244.7 and the dot is often lost, so first try the last digit as the decimal
     d = str(fuel)
     for cut in (1, 2):
-        if len(d) > cut and int(d[:-cut]) > 0 and 0.15 <= int(d[:-cut]) / km <= 1.2:
+        if len(d) > cut and int(d[:-cut]) > 0 and 0.15 <= int(d[:-cut]) / km <= FUEL_MAX_PER_KM:
             return int(d[:-cut])
-    options = [(cost, abs(v / km - 0.5), v) for v, cost in edits(fuel).items() if 0.15 <= v / km <= 1.2]
+    options = [(cost, abs(v / km - 0.5), v) for v, cost in edits(fuel).items() if 0.15 <= v / km <= FUEL_MAX_PER_KM]
     if options:
         return min(options)[2]
     return None
