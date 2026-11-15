@@ -1,11 +1,25 @@
 {
- "messages_loaded": 100,
- "newest_message": "2026-11-15T00:23:10.009000+00:00",
- "newest_saved_job": "2026-11-15T00:23:10.009000+00:00",
+ "messages_loaded": 200,
+ "newest_message": "2026-11-15T03:07:51.532000+00:00",
+ "newest_saved_job": "2026-11-15T03:07:51.532000+00:00",
  "time_limit_hit": false,
  "images_waiting": 0,
  "images_failed": 13,
  "newest_images": [
+  {
+   "posted": "2026-11-15T03:07:51.532000+00:00",
+   "status": "saved",
+   "file": "Screenshot_2026-11-15-00-02-11-840_com.WandaSoftware.TruckersofEurope3.jpg",
+   "w": 2712,
+   "h": 1220
+  },
+  {
+   "posted": "2026-11-15T03:07:31.218000+00:00",
+   "status": "saved",
+   "file": "Screenshot_2026-11-15-00-02-11-840_com.WandaSoftware.TruckersofEurope3.jpg",
+   "w": 2712,
+   "h": 1220
+  },
   {
    "posted": "2026-11-15T00:23:10.009000+00:00",
    "status": "saved",
@@ -45,20 +59,6 @@
    "posted": "2026-11-14T22:37:23.584000+00:00",
    "status": "saved",
    "file": "rn_image_picker_lib_temp_0634927c-8aa4-4e45-a05f-43c79dbd6a23.jpg",
-   "w": 1600,
-   "h": 720
-  },
-  {
-   "posted": "2026-11-14T22:35:44.987000+00:00",
-   "status": "saved",
-   "file": "rn_image_picker_lib_temp_cd98f08b-d293-4e56-af23-c5ec5ee57225.jpg",
-   "w": 1600,
-   "h": 720
-  },
-  {
-   "posted": "2026-11-14T21:12:59.602000+00:00",
-   "status": "saved",
-   "file": "Truckers_of_Europe_3_2026-11-15-00-07-48.jpg",
    "w": 1600,
    "h": 720
   }
