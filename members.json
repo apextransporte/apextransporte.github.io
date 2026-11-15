@@ -1,5 +1,5 @@
 {
-  "member_count": 51,
+  "member_count": 53,
   "visitor_count": 27,
   "members": [
     {
@@ -48,6 +48,15 @@
       "joined": "2026-03-04T21:09:25.393000+00:00"
     },
     {
+      "id": "1090944948808990760",
+      "name": "Apex Mark",
+      "username": ".m_cpm.",
+      "global_name": "Mark",
+      "nick": "Apex Mark",
+      "avatar": "https://cdn.discordapp.com/avatars/1090944948808990760/fc17bf6f576a866ef54e3a363edc06c1.png?size=128",
+      "joined": "2026-11-15T17:05:25.613000+00:00"
+    },
+    {
       "id": "1299708702739398750",
       "name": "Apex Mechanic STAR",
       "username": "star003169",
@@ -73,6 +82,15 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/1125513287681978492/578fc8a38531bbb314e9b5255c55b09e.png?size=128",
       "joined": "2026-01-04T08:17:43.673000+00:00"
+    },
+    {
+      "id": "1228754749529129124",
+      "name": "Apex trap-official07",
+      "username": "tanyaradzwa0203",
+      "global_name": "trap-official07",
+      "nick": "Apex trap-official07",
+      "avatar": null,
+      "joined": "2026-11-15T10:12:19.251000+00:00"
     },
     {
       "id": "1467003026584764619",
@@ -599,6 +617,15 @@
       "joined": "2026-11-14T15:41:54.501000+00:00"
     },
     {
+      "id": "1563249098700886120",
+      "name": "Joseph 👑🥶😁",
+      "username": "mashvenom",
+      "global_name": "Joseph 👑🥶😁",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1563249098700886120/5445ffd7ffb201a98393cbdf684ea4b1.png?size=128",
+      "joined": "2026-11-15T17:01:38.125000+00:00"
+    },
+    {
       "id": "1526178507439214702",
       "name": "Maxwell_Manyisa",
       "username": "lingomso.m2k",
@@ -660,15 +687,6 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/1533109158231150615/b41774bf8239da771f8c2241b3e9a44b.png?size=128",
       "joined": "2026-08-12T19:17:34.089000+00:00"
-    },
-    {
-      "id": "1228754749529129124",
-      "name": "trap-official07",
-      "username": "tanyaradzwa0203",
-      "global_name": "trap-official07",
-      "nick": null,
-      "avatar": null,
-      "joined": "2026-11-15T10:12:19.251000+00:00"
     },
     {
       "id": "923463582522437643",
