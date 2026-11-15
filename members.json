@@ -1,6 +1,6 @@
 {
   "member_count": 51,
-  "visitor_count": 25,
+  "visitor_count": 26,
   "members": [
     {
       "id": "883723046320484362",
@@ -642,6 +642,15 @@
       "nick": null,
       "avatar": null,
       "joined": "2026-10-24T13:53:37.995000+00:00"
+    },
+    {
+      "id": "625032783189770282",
+      "name": "Silva🇧🇷",
+      "username": "silvanf",
+      "global_name": "Silva🇧🇷",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/625032783189770282/6fc6d2cd431e0ba7cf43d60751ead768.png?size=128",
+      "joined": "2026-11-15T02:50:49.876000+00:00"
     },
     {
       "id": "1533109158231150615",
