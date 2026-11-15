@@ -792,11 +792,20 @@ def clean_name(name):
     return re.sub(r"[^a-z0-9]", "", text.lower())
 
 
+# Greek and Cyrillic letters that look like plain letters, so a name such as "! Y\u03c3\u0455\u043d\u03b9" matches "yoshi".
+LOOKALIKES = str.maketrans({
+    "\u03c3": "o", "\u03bf": "o", "\u043e": "o", "\u0455": "s", "\u043d": "h", "\u03b9": "i",
+    "\u0456": "i", "\u0430": "a", "\u03b1": "a", "\u0435": "e", "\u0440": "p", "\u0441": "c",
+    "\u0445": "x", "\u043a": "k", "\u043c": "m", "\u0442": "t", "\u03c5": "u", "\u03bd": "v",
+})
+
+
 def name_matches(name, wanted):
     """True when the cleaned name equals a wanted name, or starts with one of 4 or more letters.
     Fancy letters are turned into plain ones first, so a name written with bold letters and a TM sign
     still matches 'anas'. 'Apex | Anas', 'Anas TR' and the same name with skulls all match."""
     text = unicodedata.normalize("NFKC", str(name or "").replace("\u2122", ""))
+    text = text.translate(LOOKALIKES)
     cleaned = clean_name(text)
     return any(cleaned == w or (len(w) >= 4 and cleaned.startswith(w)) for w in wanted)
 
