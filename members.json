@@ -1,6 +1,6 @@
 {
-  "member_count": 53,
-  "visitor_count": 27,
+  "member_count": 52,
+  "visitor_count": 28,
   "members": [
     {
       "id": "883723046320484362",
@@ -343,15 +343,6 @@
       "nick": "Apex | 👑 Kay 👑",
       "avatar": "https://cdn.discordapp.com/avatars/1472331173525979168/a4651e4652a4f537820408d1fd238fe9.png?size=128",
       "joined": "2026-04-20T00:15:04.638000+00:00"
-    },
-    {
-      "id": "1493339698343575843",
-      "name": "APEX || Sunny ™",
-      "username": "lord_sakai_jin",
-      "global_name": "The Sun ™",
-      "nick": "APEX || Sunny ™",
-      "avatar": "https://cdn.discordapp.com/avatars/1493339698343575843/00baa14b384e3bc9dbb25aa71354e73e.png?size=128",
-      "joined": "2026-06-11T18:54:33.048000+00:00"
     },
     {
       "id": "987835664932425728",
@@ -723,6 +714,15 @@
       "nick": null,
       "avatar": "https://cdn.discordapp.com/avatars/1427022566060593162/b8888dc7f7ea37e4728d5580d8900e01.png?size=128",
       "joined": "2026-11-05T10:22:00.032000+00:00"
+    },
+    {
+      "id": "1223148913780064357",
+      "name": "💋𝗺𝗮𝗺𝗶𝘁𝗼❦",
+      "username": "missbadone",
+      "global_name": "💋𝗺𝗮𝗺𝗶𝘁𝗼❦",
+      "nick": null,
+      "avatar": "https://cdn.discordapp.com/avatars/1223148913780064357/cd6769d0944fe98c8593ef29dd0989db.png?size=128",
+      "joined": "2026-11-16T08:45:19.544000+00:00"
     }
   ]
 }
