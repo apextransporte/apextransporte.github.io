@@ -1,24 +1,3 @@
 {
-  "convoys": [
-    {
-      "title": "Apex Transporte Company Convoy",
-      "start": 1794938400,
-      "route": "Stuttgart To Munich",
-      "room": "P3FEU",
-      "notes": "Convoy note for today. Read this before you roll.\n\nKeep a safe gap from the truck ahead. Stay in your lane and follow the lead driver. Use your indicators early. \n\nWait for the leader before you leave the meetup point. Drive at the set speed limit. If you lose the convoy, tell us in chat right away.\n\nSee you on the road. 🚛",
-      "host": "Apex | keem",
-      "slots": 10,
-      "drivers": [
-        "Apex | keem",
-        "APEX | Rønin",
-        "APEX | Niel ™",
-        "Apex乛Baku★",
-        "Apex | mrx",
-        "𝐀𝐏𝐄𝐗<>𝐀𝐍𝐀𝐒",
-        "Apex | The-T",
-        "Apex trap-official07",
-        "Apex_ReX🇹🇷"
-      ]
-    }
-  ]
+  "convoys": []
 }
