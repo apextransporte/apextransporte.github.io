@@ -1,11 +1,18 @@
 {
  "messages_loaded": 200,
- "newest_message": "2026-11-18T16:28:51.023000+00:00",
- "newest_saved_job": "2026-11-18T16:28:51.023000+00:00",
+ "newest_message": "2026-11-18T17:44:16.955000+00:00",
+ "newest_saved_job": "2026-11-18T17:44:16.955000+00:00",
  "time_limit_hit": false,
  "images_waiting": 0,
  "images_failed": 15,
  "newest_images": [
+  {
+   "posted": "2026-11-18T17:44:16.955000+00:00",
+   "status": "saved",
+   "file": "XRecorder_20261118_03.png",
+   "w": 2220,
+   "h": 1080
+  },
   {
    "posted": "2026-11-18T16:28:51.023000+00:00",
    "status": "saved",
@@ -52,13 +59,6 @@
    "posted": "2026-11-18T07:45:30.263000+00:00",
    "status": "saved",
    "file": "Truckers_of_Europe_3_2026-11-18-09-47-45.jpg",
-   "w": 1600,
-   "h": 720
-  },
-  {
-   "posted": "2026-11-18T07:35:06.109000+00:00",
-   "status": "saved",
-   "file": "rn_image_picker_lib_temp_15148bec-7e36-4c60-b2dc-2c972bb6d2fb.jpg",
    "w": 1600,
    "h": 720
   }
