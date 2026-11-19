@@ -744,21 +744,56 @@ def build_rankings(jobs, table):
                            "rate": "{}%".format(round(100 * s["clean"] / s["jobs"]))})
     clean_rank.sort(key=lambda r: (r["clean"], r["clean"] / r["jobs"]), reverse=True)
 
-    # 3. Worst delivery rank: the single jobs with the highest damage plus time penalty
-    worst, seen_drivers = [], set()
-    for j in sorted(jobs, key=lambda x: sum(job_penalties(x) or (0, 0)), reverse=True):
+    # 3. Worst driver rank: total damage plus time penalty across ALL of a driver's jobs
+    totals = {}
+    for j in jobs:
         pen = job_penalties(j)
-        if pen is None or sum(pen) == 0 or j["author"] in seen_drivers:
-            continue   # one entry per driver, the driver's single worst job
-        seen_drivers.add(j["author"])
-        worst.append({"name": j["name"], "date": j.get("ts", ""), "km": "{} km".format(j["km"]),
-                      "damage": "\u20ac{:,}".format(pen[0]), "time_penalty": "\u20ac{:,}".format(pen[1]),
-                      "total": "\u20ac{:,}".format(sum(pen)), "_sort": sum(pen)})
-    worst.sort(key=lambda r: r["_sort"], reverse=True)
-    for r in worst:
-        r.pop("_sort")
+        if pen is None:
+            continue
+        t = totals.setdefault(j["author"], {"name": j["name"], "jobs": 0, "km": 0,
+                                            "damage": 0, "time": 0, "income": 0, "last": ""})
+        t["name"] = j["name"]
+        t["jobs"] += 1
+        try:
+            t["km"] += int(j.get("km", 0))
+        except (TypeError, ValueError):
+            pass
+        t["damage"] += pen[0]
+        t["time"] += pen[1]
+        try:
+            t["income"] += int(j.get("income", 0))
+        except (TypeError, ValueError):
+            pass
+        t["last"] = max(t["last"], j.get("ts", ""))
+    worst = []
+    for t in totals.values():
+        total = t["damage"] + t["time"]
+        if total == 0:
+            continue
+        worst.append({"name": t["name"], "date": t["last"], "jobs": t["jobs"],
+                      "km": "{:,} km".format(t["km"]),
+                      "damage": "\u20ac{:,}".format(t["damage"]),
+                      "time_penalty": "\u20ac{:,}".format(t["time"]),
+                      "total": "\u20ac{:,}".format(total),
+                      "income": t["income"],
+                      "damage_value": t["damage"], "time_value": t["time"],
+                      "total_value": total})
+    worst.sort(key=lambda r: r["total_value"], reverse=True)
 
-    return {"level": level_rank[:RANK_SIZE], "clean": clean_rank[:RANK_SIZE], "worst": worst[:RANK_SIZE]}
+    # Company totals and each driver's share of the company cost
+    company_cost = sum(r["total_value"] for r in worst)
+    for r in worst:
+        r["share_value"] = round(100 * r["total_value"] / company_cost, 1) if company_cost else 0
+        r["share"] = "{:.1f}%".format(r["share_value"])
+    worst_totals = {
+        "jobs": sum(r["jobs"] for r in worst),
+        "damage": sum(r["damage_value"] for r in worst),
+        "time_penalty": sum(r["time_value"] for r in worst),
+        "total": company_cost,
+    }
+
+    return {"level": level_rank[:RANK_SIZE], "clean": clean_rank[:RANK_SIZE], "worst": worst,
+            "worst_totals": worst_totals}
 
 
 
