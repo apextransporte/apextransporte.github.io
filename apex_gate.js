@@ -33,7 +33,12 @@
     var m = PRIVATE.exec(url);
     if (!m) return realFetch(input, init);
     var t = token();
-    if (!t) return Promise.reject(new Error("members only"));
+    if (!t) {
+      /* Visitors get company totals only (for the Our numbers box). Everything else never answers,
+         because a rejected request would let app.js fill the page with partial numbers. */
+      if (m[1] === "data") return realFetch(API + "/api/public", { cache: "no-store" });
+      return new Promise(function () {});
+    }
     return realFetch(API + "/api/file/" + m[1] + ".json", {
       headers: { Authorization: "Bearer " + t }, cache: "no-store"
     }).then(function (r) {

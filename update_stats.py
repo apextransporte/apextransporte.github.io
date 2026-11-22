@@ -789,7 +789,7 @@ def build_rankings(jobs, table):
         "jobs": sum(r["jobs"] for r in worst),
         "damage": sum(r["damage_value"] for r in worst),
         "time_penalty": sum(r["time_value"] for r in worst),
-        "total": company_cost,
+        "total": sum(r["total_value"] for r in worst),
     }
 
     return {"level": level_rank[:RANK_SIZE], "clean": clean_rank[:RANK_SIZE], "worst": worst,
