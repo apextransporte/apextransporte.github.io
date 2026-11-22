@@ -1,14 +1,17 @@
-/* Apex members-only gate. Put this file next to index.html and load it with:
-   <script src="apex_gate.js" defer></script>
-   Mark each private section with data-members-only.
-   Add one box with data-gate-message holding your Join Discord button and a Sign in link. */
+/* Apex members-only gate.
+   Load order: this file runs first. It checks the Discord sign-in, fills the private parts of the page
+   from the bot, then loads app.js. Private files (data, net_worth, apex_drivers, members) are fetched
+   from the locked bot route instead of the public site. */
 (function () {
-  var API = "https://YOUR-RENDER-URL.onrender.com"; // change to your Render address
+  var API = "https://apex-bot-52td.onrender.com";
   var KEY = "apex_token";
+  var PRIVATE = /(?:^|\/)(data|net_worth|apex_drivers|members)\.json(?:\?|$)/;
+  var realFetch = window.fetch.bind(window);
+
   var style = document.createElement("style");
-  style.textContent = "[data-members-only]{display:none}[data-gate-message]{display:none}" +
-    "body.apex-member [data-members-only]{display:block}" +
-    "body:not(.apex-member) [data-gate-message]{display:block}";
+  style.textContent = "body:not(.apex-member) [data-members-only]{display:none!important}" +
+    "[data-gate-message]{display:none}" +
+    "body:not(.apex-member):not(.apex-wait) [data-gate-message]{display:block}";
   document.head.appendChild(style);
 
   var hash = location.hash;
@@ -20,10 +23,33 @@
     history.replaceState(null, "", location.pathname + location.search);
   }
 
-  function loginUrl() { return API + "/auth/login"; }
   function token() { try { return localStorage.getItem(KEY); } catch (e) { return null; } }
+  function drop() { try { localStorage.removeItem(KEY); } catch (e) {} }
+  function loginUrl() { return API + "/auth/login"; }
+
+  /* app.js asks for the private files by their old names. Send those requests to the locked route. */
+  window.fetch = function (input, init) {
+    var url = typeof input === "string" ? input : (input && input.url) || "";
+    var m = PRIVATE.exec(url);
+    if (!m) return realFetch(input, init);
+    var t = token();
+    if (!t) return Promise.reject(new Error("members only"));
+    return realFetch(API + "/api/file/" + m[1] + ".json", {
+      headers: { Authorization: "Bearer " + t }, cache: "no-store"
+    }).then(function (r) {
+      if (!r.ok) throw new Error("locked");
+      return r;
+    });
+  };
+
+  function loadApp() {
+    var s = document.createElement("script");
+    s.src = "app.js?v=2";
+    document.body.appendChild(s);
+  }
 
   function showLocked() {
+    document.body.classList.remove("apex-wait");
     document.body.classList.remove("apex-member");
     document.querySelectorAll("[data-sign-in]").forEach(function (a) { a.href = loginUrl(); });
     document.querySelectorAll("[data-denied-note]").forEach(function (n) {
@@ -31,31 +57,37 @@
     });
   }
 
-  function load() {
+  function fill(d) {
+    var table = document.getElementById("jobsTable");
+    if (table && d.jobs_rows) table.insertAdjacentHTML("beforeend", d.jobs_rows);
+    var list = document.getElementById("dlist");
+    if (list && d.dlist) list.innerHTML = d.dlist;
+  }
+
+  function start() {
     var t = token();
-    if (!t) { showLocked(); return; }
-    fetch(API + "/api/data", { headers: { Authorization: "Bearer " + t } })
+    if (!t) { showLocked(); loadApp(); return; }
+    document.body.classList.add("apex-wait");
+    realFetch(API + "/api/static", { headers: { Authorization: "Bearer " + t }, cache: "no-store" })
       .then(function (r) {
-        if (r.status === 401 || r.status === 403) {
-          try { localStorage.removeItem(KEY); } catch (e) {}
-          showLocked();
-          return null;
-        }
+        if (r.status === 401 || r.status === 403) { drop(); return null; }
+        if (!r.ok) throw new Error("bad status");
         return r.json();
       })
-      .then(function (data) {
-        if (!data) return;
+      .then(function (d) {
+        if (!d) { showLocked(); loadApp(); return; }
+        fill(d);
+        document.body.classList.remove("apex-wait");
         document.body.classList.add("apex-member");
-        window.ApexData = data;
-        document.dispatchEvent(new CustomEvent("apex:data", { detail: data }));
+        loadApp();
       })
-      .catch(showLocked);
+      .catch(function () { showLocked(); loadApp(); });
   }
 
   window.ApexGate = {
     loginUrl: loginUrl,
-    signOut: function () { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); }
+    signOut: function () { drop(); location.reload(); }
   };
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", load);
-  else load();
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
 })();
