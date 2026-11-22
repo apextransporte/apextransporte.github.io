@@ -768,7 +768,7 @@ def build_rankings(jobs, table):
     worst = []
     for t in totals.values():
         total = t["damage"] + t["time"]
-        if total == 0:
+        if t["damage"] == 0:
             continue
         worst.append({"name": t["name"], "date": t["last"], "jobs": t["jobs"],
                       "km": "{:,} km".format(t["km"]),
@@ -778,12 +778,12 @@ def build_rankings(jobs, table):
                       "income": t["income"],
                       "damage_value": t["damage"], "time_value": t["time"],
                       "total_value": total})
-    worst.sort(key=lambda r: r["total_value"], reverse=True)
+    worst.sort(key=lambda r: r["damage_value"], reverse=True)
 
     # Company totals and each driver's share of the company cost
-    company_cost = sum(r["total_value"] for r in worst)
+    company_damage = sum(r["damage_value"] for r in worst)
     for r in worst:
-        r["share_value"] = round(100 * r["total_value"] / company_cost, 1) if company_cost else 0
+        r["share_value"] = round(100 * r["damage_value"] / company_damage, 1) if company_damage else 0
         r["share"] = "{:.1f}%".format(r["share_value"])
     worst_totals = {
         "jobs": sum(r["jobs"] for r in worst),
