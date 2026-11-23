@@ -54,7 +54,7 @@
 
   function loadApp() {
     var s = document.createElement("script");
-    s.src = "app.js?v=2";
+    s.src = "app.js?v=20261123";
     document.body.appendChild(s);
   }
 
