@@ -1,11 +1,18 @@
 {
  "messages_loaded": 200,
- "newest_message": "2026-11-23T14:56:31.903000+00:00",
- "newest_saved_job": "2026-11-23T14:56:31.903000+00:00",
+ "newest_message": "2026-11-23T16:08:53.852000+00:00",
+ "newest_saved_job": "2026-11-23T16:08:53.852000+00:00",
  "time_limit_hit": false,
  "images_waiting": 0,
  "images_failed": 16,
  "newest_images": [
+  {
+   "posted": "2026-11-23T16:08:53.852000+00:00",
+   "status": "saved",
+   "file": "IMG_5187.png",
+   "w": 2622,
+   "h": 1206
+  },
   {
    "posted": "2026-11-23T14:56:31.903000+00:00",
    "status": "saved",
@@ -54,13 +61,6 @@
    "file": "Screenshot_20261123_174039_com.WandaSoftware.TruckersofEurope3.jpg",
    "w": 2400,
    "h": 1080
-  },
-  {
-   "posted": "2026-11-23T12:46:44.954000+00:00",
-   "status": "saved",
-   "file": "Screenshot_20261123-154033_Truckers_of_Europe_3.jpg",
-   "w": 1480,
-   "h": 720
   }
  ]
 }
