@@ -1,24 +1,31 @@
 {
  "messages_loaded": 200,
- "newest_message": "2026-11-23T12:46:44.954000+00:00",
- "newest_saved_job": "2026-11-23T12:46:44.954000+00:00",
+ "newest_message": "2026-11-23T12:47:47.570000+00:00",
+ "newest_saved_job": "2026-11-23T12:47:47.570000+00:00",
  "time_limit_hit": false,
- "images_waiting": 1,
+ "images_waiting": 0,
  "images_failed": 16,
  "newest_images": [
+  {
+   "posted": "2026-11-23T12:47:47.570000+00:00",
+   "status": "saved",
+   "file": "Screenshot_20261123_181323_com.WandaSoftware.TruckersofEurope3.jpg",
+   "w": 2400,
+   "h": 1080
+  },
+  {
+   "posted": "2026-11-23T12:47:44.967000+00:00",
+   "status": "saved",
+   "file": "Screenshot_20261123_174039_com.WandaSoftware.TruckersofEurope3.jpg",
+   "w": 2400,
+   "h": 1080
+  },
   {
    "posted": "2026-11-23T12:46:44.954000+00:00",
    "status": "saved",
    "file": "Screenshot_20261123-154033_Truckers_of_Europe_3.jpg",
    "w": 1480,
    "h": 720
-  },
-  {
-   "posted": "2026-11-23T12:46:44.954000+00:00",
-   "status": "failed nojob x1",
-   "file": "st-michael-the-archangel.jpg",
-   "w": 708,
-   "h": 1080
   },
   {
    "posted": "2026-11-23T10:53:45.657000+00:00",
@@ -54,13 +61,6 @@
    "file": "IMG_5184.png",
    "w": 2622,
    "h": 1206
-  },
-  {
-   "posted": "2026-11-23T08:34:18.512000+00:00",
-   "status": "saved",
-   "file": "Truckers_of_Europe_3_2026-11-23-11-31-46.jpg",
-   "w": 1600,
-   "h": 720
   }
  ]
 }
