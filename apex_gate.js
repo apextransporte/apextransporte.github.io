@@ -69,9 +69,10 @@
 
   function fill(d) {
     var table = document.getElementById("jobsTable");
-    if (table && d.jobs_rows) table.insertAdjacentHTML("beforeend", d.jobs_rows);
+    var rename = function (html) { return String(html).split("Corprate keem").join("Apex | keem"); };
+    if (table && d.jobs_rows) table.insertAdjacentHTML("beforeend", rename(d.jobs_rows));
     var list = document.getElementById("dlist");
-    if (list && d.dlist) list.innerHTML = d.dlist;
+    if (list && d.dlist) list.innerHTML = rename(d.dlist);
   }
 
   function start() {

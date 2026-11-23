@@ -758,7 +758,7 @@ const APEX_FEED_URL = "";
   }
   function who(name,pool){
     var n=nz(name);if(!n)return -2;
-    if(ALWAYS[n])return -2;
+    var raw=n;
     var al=ALIAS[n];if(al){name=al;n=nz(al);}
     var i,p;
     for(i=0;i<pool.length;i++){if(pool[i].keys[n])return i;}
@@ -772,7 +772,7 @@ const APEX_FEED_URL = "";
       for(i=0;i<pool.length;i++){p=pool[i];
         if(dt.every(function(t){return p.toks[t];}))return i;}
     }
-    return -1;
+    return ALWAYS[raw]?-2:-1;
   }
   function inServer(name,pool){return who(name,pool)!==-1;}
   window.__apexInServer={build:build,inServer:inServer,who:who};
@@ -786,12 +786,14 @@ const APEX_FEED_URL = "";
       [].slice.call(table.querySelectorAll(".jr:not(.hd)")).forEach(function(r){
         var b=r.querySelector("b");if(!b)return;
         var w=who(b.textContent,pool);
+        if(w===-2&&ALWAYS[nz(b.textContent)])w="a:keem";
         if(w===-1){r.remove();return;}
         if(w<0)return;
         var filled=[].slice.call(r.querySelectorAll("span")).filter(function(s){return s.textContent.trim()!=="\u2014";}).length;
+        var f0=r.querySelector("span"),km=f0?parseInt(f0.textContent.replace(/[^0-9]/g,""),10)||0:0;
         var o=best[w];
-        if(!o){best[w]={row:r,filled:filled};}
-        else if(filled>o.filled){o.row.remove();best[w]={row:r,filled:filled};}
+        if(!o){best[w]={row:r,filled:filled,km:km};}
+        else if(filled>o.filled||(filled===o.filled&&km>o.km)){o.row.remove();best[w]={row:r,filled:filled,km:km};}
         else{r.remove();}
       });
       var c=document.getElementById("jobCount");
@@ -799,8 +801,10 @@ const APEX_FEED_URL = "";
     }
     var dl=document.getElementById("dlist");
     if(dl){
+      var dseen=false;
       [].slice.call(dl.querySelectorAll(".dcard")).forEach(function(d){
-        var b=d.querySelector("b");if(b&&!inServer(b.textContent,pool))d.remove();
+        var b=d.querySelector("b");if(b&&!inServer(b.textContent,pool)){d.remove();return;}
+        if(b&&ALWAYS[nz(b.textContent)]){if(dseen){d.remove();}else{dseen=true;}}
       });
       [].slice.call(dl.querySelectorAll(".dgroup")).forEach(function(g){
         if(!g.querySelector(".dcard"))g.remove();
