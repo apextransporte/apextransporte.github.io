@@ -5,6 +5,10 @@ import sys
 MEMBERS_FILE = "members.json"
 TARGET_FILES = ["jobs.json", "apex_drivers.json"]
 
+# Always kept, even when members.json misses the account.
+ALWAYS_IDS = {"958600206432239656"}
+ALWAYS_NAMES = {"corprate keem", "apex | keem", "keem"}
+
 ID_KEYS = ["discord_id", "user_id", "id", "member_id"]
 NAME_KEYS = ["name", "driver", "member", "username", "author", "player", "user"]
 
@@ -25,6 +29,8 @@ def load_official():
                 names.add(norm(m[key]))
     if not ids:
         sys.exit("members.json has no official members. Stopping to protect your data.")
+    ids |= ALWAYS_IDS
+    names |= ALWAYS_NAMES
     return ids, names
 
 
