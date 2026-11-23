@@ -38,7 +38,7 @@ jobs:
         run: |
           git config user.name "apex-data-bot"
           git config user.email "apex-data-bot@users.noreply.github.com"
-          for f in members.json jobs.json apex_drivers.json; do
+          for f in members.json jobs.json apex_drivers.json removed_rows.json; do
             if [ -f "$f" ]; then git add "$f"; fi
           done
           if git diff --staged --quiet; then
