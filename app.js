@@ -736,6 +736,8 @@ const APEX_FEED_URL = "";
   /* Keeps the driver table, the Driver directory and the staff cards in step with the Discord server. members.json is rebuilt every 30 minutes by the bot. */
   var STOP={apex:1,the:1};
   var ALIAS={corpratekeem:"keem",nightwingtir:"nightwingsa"};
+  /* Always shown, even when members.json misses them. */
+  var ALWAYS={corpratekeem:1,apexkeem:1,keem:1};
   function nz(s){return String(s||"").normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]/gu,"");}
   function tk(s){return String(s||"").normalize("NFKC").toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);}
   /* Plain letters and digits only, with and without the Apex tag. "Apex乛Baku★" and "Apex | Baku★" give the same key. */
@@ -756,6 +758,7 @@ const APEX_FEED_URL = "";
   }
   function who(name,pool){
     var n=nz(name);if(!n)return -2;
+    if(ALWAYS[n])return -2;
     var al=ALIAS[n];if(al){name=al;n=nz(al);}
     var i,p;
     for(i=0;i<pool.length;i++){if(pool[i].keys[n])return i;}

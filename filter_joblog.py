@@ -9,6 +9,9 @@ TARGET_FILES = ["jobs.json", "apex_drivers.json"]
 ALWAYS_IDS = {"958600206432239656"}
 ALWAYS_NAMES = {"corprate keem", "apex | keem", "keem"}
 
+BACKUP_FILE = "removed_rows.json"
+BACKUP = []   # rows removed in this run, saved so a role mistake never loses data
+
 ID_KEYS = ["discord_id", "user_id", "id", "member_id"]
 NAME_KEYS = ["name", "driver", "member", "username", "author", "player", "user"]
 
@@ -53,6 +56,7 @@ def filter_list(rows, ids, names, label):
         else:
             kept.append(row)
     for row in removed:
+        BACKUP.append({"label": label, "row": row})
         shown = next((row[k] for k in NAME_KEYS if k in row), "unknown")
         print(f"{label}: removed {shown}")
     return kept
@@ -82,19 +86,60 @@ def filter_data(data, ids, names, label):
     return data
 
 
+def load_backup():
+    if os.path.exists(BACKUP_FILE):
+        try:
+            with open(BACKUP_FILE, encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, list):
+                return data
+        except (OSError, ValueError):
+            pass
+    return []
+
+
+def restore_rows(path, data, ids, names, saved):
+    """Puts back saved rows of top-level list files when their owner is an official member again."""
+    if not isinstance(data, list):
+        return data, saved
+    have = {str(r.get("id")) for r in data if isinstance(r, dict) and r.get("id") is not None}
+    keep_saved = []
+    back = 0
+    for item in saved:
+        row = item.get("row")
+        if item.get("label") == path and isinstance(row, dict) and is_official(row, ids, names):
+            if str(row.get("id")) not in have:
+                data.append(row)
+                back += 1
+            continue
+        keep_saved.append(item)
+    if back:
+        if all(isinstance(r, dict) and "ts" in r for r in data):
+            data.sort(key=lambda r: r["ts"])
+        print(f"{path}: restored {back} saved rows")
+    return data, keep_saved
+
+
 def main():
     ids, names = load_official()
     files = sys.argv[1:] or TARGET_FILES
+    saved = load_backup()
     for path in files:
         if not os.path.exists(path):
             print(f"Skipped {path}: file not found")
             continue
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
+        data, saved = restore_rows(path, data, ids, names, saved)
         cleaned = filter_data(data, ids, names, path)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(cleaned, f, indent=2, ensure_ascii=False)
         print(f"Cleaned {path}")
+    saved = saved + BACKUP
+    if saved:
+        with open(BACKUP_FILE, "w", encoding="utf-8") as f:
+            json.dump(saved, f, ensure_ascii=False)
+        print(f"Saved {len(saved)} removed rows in {BACKUP_FILE}")
 
 
 if __name__ == "__main__":
