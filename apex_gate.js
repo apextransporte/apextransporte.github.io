@@ -43,7 +43,12 @@
       headers: { Authorization: "Bearer " + t }, cache: "no-store"
     }).then(function (r) {
       if (!r.ok) throw new Error("locked");
-      return r;
+      /* Show keem under the Discord name Apex | keem everywhere on the site. */
+      return r.text().then(function (text) {
+        return new Response(text.split("Corprate keem").join("Apex | keem"), {
+          status: r.status, headers: r.headers
+        });
+      });
     });
   };
 
