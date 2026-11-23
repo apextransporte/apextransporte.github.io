@@ -74,9 +74,19 @@ def avatar_url(m):
     return None
 
 
+def official_role_ids():
+    """The saved role ID plus every role named Official members, in case the server holds two roles with that name."""
+    ids = {OFFICIAL_ROLE_ID}
+    for role in get_json(f"{API}/guilds/{GUILD_ID}/roles"):
+        if role["name"].strip().lower() == "official members":
+            ids.add(role["id"])
+    return ids
+
+
 def main():
     official = []
     visitors = []
+    official_ids = official_role_ids()
 
     for m in fetch_all_members():
         if m["user"].get("bot"):
@@ -91,7 +101,7 @@ def main():
             "joined": m.get("joined_at"),
         }
         roles = m["roles"]
-        if OFFICIAL_ROLE_ID in roles:
+        if official_ids.intersection(roles):
             official.append(entry)
         elif VISITOR_ROLE_ID in roles:
             visitors.append(entry)
