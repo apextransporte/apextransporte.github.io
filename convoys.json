@@ -1,34 +1,3 @@
 {
-  "convoys": [
-    {
-      "title": "Munich to Nuremberg Short Run",
-      "start": 1795555800,
-      "route": "Munich to Nuremberg",
-      "truck": "Any",
-      "trailer": "Closed box or curtain side only",
-      "room": "KGLGK",
-      "notes": "Any truck is allowed today, but please use a closed box or curtain side trailer. Follow the speed limit (max 120), no overtaking unless necessary, and stay in one line.",
-      "host": "Apex | mrx",
-      "slots": 20,
-      "drivers": [
-        "Apex | mrx"
-      ]
-    },
-    {
-      "title": "Munich to Nuremberg Short Run",
-      "start": 1795555800,
-      "route": "Munich to Nuremberg",
-      "truck": "Any",
-      "trailer": "Closed box or curtain side only",
-      "room": "KGLGK",
-      "notes": "Any truck is allowed today, but please use a closed box or curtain side trailer. Follow the speed limit (max 120), no overtaking unless necessary, and stay in one line.",
-      "host": "Apex | mrx",
-      "slots": 20,
-      "drivers": [
-        "Apex | mrx",
-        "Apex | keem",
-        "APEX | Niel ™"
-      ]
-    }
-  ]
+  "convoys": []
 }
