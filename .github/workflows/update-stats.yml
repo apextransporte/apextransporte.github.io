@@ -52,6 +52,15 @@ jobs:
           DISCORD_REPORT_CHANNEL_ID: ${{ secrets.DISCORD_REPORT_CHANNEL_ID }}
         run: python update_stats.py
 
+      - name: Run staff_sync.py
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          GUILD_ID: ${{ secrets.GUILD_ID }}
+        run: python staff_sync.py
+
       - name: Save results
         if: always()
         run: |
