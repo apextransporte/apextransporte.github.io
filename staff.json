@@ -1,92 +1,81 @@
 {
-  "staff": [
-    {
-      "name": "Apex_ReX🇹🇷",
-      "roles": [
-        "Founder",
-        "Upper management"
-      ],
-      "tier": "lead"
-    },
-    {
-      "name": "Apex | keem",
-      "roles": [
-        "CEO",
-        "Upper management"
-      ],
-      "tier": "lead"
-    },
-    {
-      "name": "| Niel ™",
-      "roles": [
-        "Manager",
-        "Upper management"
-      ],
-      "tier": "lead"
-    },
-    {
-      "name": "Apex | GENERAL",
-      "roles": [
-        "Moderator"
-      ],
-      "tier": "team"
-    },
-    {
-      "name": "APEX | Rønin",
-      "roles": [
-        "Moderator"
-      ],
-      "tier": "team"
-    },
-    {
-      "name": "Apex | The-T",
-      "roles": [
-        "Support team",
-        "Skin team"
-      ],
-      "tier": "team"
-    },
-    {
-      "name": "Goku black 🩹♥",
-      "roles": [
-        "Support team"
-      ],
-      "tier": "team"
-    },
-    {
-      "name": "Apex sbuda 101",
-      "roles": [
-        "Skin team"
-      ],
-      "tier": "team"
-    },
-    {
-      "name": "Apex | Baku★",
-      "roles": [
-        "Skin team"
-      ],
-      "tier": "team"
-    },
-    {
-      "name": "Apex | Razael",
-      "roles": [
-        "Skin team"
-      ],
-      "tier": "team"
-    },
-    {
-      "name": "Apex | VU",
-      "roles": [
-        "Skin team"
-      ],
-      "tier": "team"
-    },
-    {
-      "name": "𝐀𝐏𝐄𝐗<>𝐀𝐍𝐀𝐒",
-      "roles": [
-        "Skin team"
-      ],
-      "tier": "team"
-    }
-  ]
+ "total": 13,
+ "leadership": [
+  {
+   "name": "Apex_ReX🇹🇷",
+   "main": "Founder",
+   "tags": [
+    "Upper management"
+   ]
+  },
+  {
+   "name": "Apex | keem",
+   "main": "CEO",
+   "tags": [
+    "Upper management"
+   ]
+  },
+  {
+   "name": "APEX | Niel ™",
+   "main": "Manager",
+   "tags": [
+    "Upper management"
+   ]
+  }
+ ],
+ "team": [
+  {
+   "name": "Apex | mrx",
+   "main": "Convoy and Meetup Manager",
+   "tags": []
+  },
+  {
+   "name": "Apex | GENERAL",
+   "main": "Moderator",
+   "tags": []
+  },
+  {
+   "name": "APEX | Rønin",
+   "main": "Moderator",
+   "tags": []
+  },
+  {
+   "name": "Apex | The-T",
+   "main": "Support team",
+   "tags": [
+    "Skin team"
+   ]
+  },
+  {
+   "name": "Goku black 🩹♥",
+   "main": "Support team",
+   "tags": []
+  },
+  {
+   "name": "Apex sbuda 101",
+   "main": "Skin team",
+   "tags": []
+  },
+  {
+   "name": "Apex |  Vuwyl",
+   "main": "Skin team",
+   "tags": []
+  },
+  {
+   "name": "Apex | Razael",
+   "main": "Skin team",
+   "tags": []
+  },
+  {
+   "name": "Apex乛Baku★",
+   "main": "Skin team",
+   "tags": []
+  },
+  {
+   "name": "𝐀𝐏𝐄𝐗<>𝐀𝐍𝐀𝐒",
+   "main": "Skin team",
+   "tags": []
+  }
+ ],
+ "updated": "2026-11-25T08:06:25+00:00"
 }
