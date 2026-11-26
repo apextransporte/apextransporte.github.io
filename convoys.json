@@ -1,3 +1,18 @@
 {
-  "convoys": []
+  "convoys": [
+    {
+      "title": "APEX VTC | European Money & XP Convoy 🚛",
+      "start": 1795892400,
+      "route": "Frankfurt → Nuremberg → Munich → Milano",
+      "truck": "Iveco S-Way (Mandatory)",
+      "trailer": "Oversized (White Red)",
+      "room": "mrxdking",
+      "notes": "Official APEX VTC money and XP convoy. Depart Frankfurt and deliver to Nuremberg. Regroup in Nuremberg and select a new oversized delivery to Munich. Regroup again in Munich and select another oversized delivery to Milano. Maintain formation and follow convoy leader instructions.",
+      "host": "Apex | mrx",
+      "slots": 20,
+      "drivers": [
+        "Apex | mrx"
+      ]
+    }
+  ]
 }
