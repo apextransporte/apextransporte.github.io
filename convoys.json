@@ -1,6 +1,20 @@
 {
   "convoys": [
     {
+      "title": "APEX VTC | One-Way Cruise 🚛",
+      "start": 1795719600,
+      "route": "Munich 🇩🇪 → Airolo 🇨🇭",
+      "truck": "Ford (See attached image)",
+      "trailer": "Curtain Side 2 / Closed Box (See attached image)",
+      "room": "mrxdking",
+      "notes": "Relaxed APEX VTC one-way convoy. Enjoy the journey, cruise together, have fun with fellow drivers and keep a smooth convoy formation. Follow the convoy leader, maintain one-lane formation, keep a safe distance and do not overtake. No rushing, no pressure – just good vibes and great driving! 🚛🔥",
+      "host": "Apex | mrx",
+      "slots": 20,
+      "drivers": [
+        "Apex | mrx"
+      ]
+    },
+    {
       "title": "APEX VTC | European Money & XP Convoy 🚛",
       "start": 1795892400,
       "route": "Frankfurt → Nuremberg → Munich → Milano",
