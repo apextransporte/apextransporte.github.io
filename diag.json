@@ -1,11 +1,18 @@
 {
  "messages_loaded": 200,
- "newest_message": "2026-11-27T04:23:41.117000+00:00",
- "newest_saved_job": "2026-11-27T04:23:41.117000+00:00",
+ "newest_message": "2026-11-27T04:27:18.947000+00:00",
+ "newest_saved_job": "2026-11-27T04:27:18.947000+00:00",
  "time_limit_hit": false,
  "images_waiting": 0,
  "images_failed": 16,
  "newest_images": [
+  {
+   "posted": "2026-11-27T04:27:18.947000+00:00",
+   "status": "saved",
+   "file": "IMG_0630.png",
+   "w": 2778,
+   "h": 1284
+  },
   {
    "posted": "2026-11-27T04:23:41.117000+00:00",
    "status": "saved",
@@ -53,13 +60,6 @@
    "status": "saved",
    "file": "XRecorder_20261126_01.png",
    "w": 2220,
-   "h": 1080
-  },
-  {
-   "posted": "2026-11-26T18:18:51.160000+00:00",
-   "status": "saved",
-   "file": "Screenshot_20261126-225134.jpg",
-   "w": 2436,
    "h": 1080
   }
  ]
